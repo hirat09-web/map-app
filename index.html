@@ -8,70 +8,77 @@
 
 <style>
 #map { height: 100vh; }
+
+/* UIボックス */
+.control-box {
+  position:absolute;
+  left:10px;
+  z-index:1000;
+  background:white;
+  padding:8px;
+  margin-bottom:5px;
+  border-radius:6px;
+  box-shadow:0 0 5px rgba(0,0,0,0.3);
+}
 </style>
 </head>
 
 <body>
 
-<!-- ===== ボタン ===== -->
-<div style="position:absolute; top:10px; left:10px; z-index:1000;">
-  <button onclick="showArea('Huanipaca')">Huanipaca</button>
-  <button onclick="showArea('Yanatile')">Yanatile</button>
-  <button onclick="showArea('SJO')">San Juan del Oro</button>
+<!-- ===== エリア選択 ===== -->
+<div class="control-box" style="top:10px;">
+  <b>エリア選択</b><br>
+  <button onclick="showArea('Huanipaca')">Huanipaca</button><br>
+  <button onclick="showArea('Yanatile')">Yanatile</button><br>
+  <button onclick="showArea('SJO')">SJO</button>
 </div>
 
-<!-- ===== スライダー ===== -->
-<div style="position:absolute; top:80px; left:10px; z-index:1000; background:white; padding:5px;">
-  透明度:
+<!-- ===== 透明度 ===== -->
+<div class="control-box" style="top:130px;">
+  <b>透明度</b><br>
   <input type="range" min="0" max="1" step="0.1" value="0.6" id="opacitySlider">
+</div>
+
+<!-- ===== ラベルON/OFF ===== -->
+<div class="control-box" style="top:200px;">
+  <label>
+    <input type="checkbox" id="labelToggle" checked>
+    地名ラベル
+  </label>
 </div>
 
 <div id="map"></div>
 
 <script>
 
-// ===== 地図作成 =====
+// ===== 地図 =====
 var map = L.map('map').setView([-13.5, -72.5], 8);
 
-// ===== Pane作成 =====
+// ===== ベースマップ =====
+var osm = L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+).addTo(map);
+
+var esri = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+);
+
+// 切替
+L.control.layers({
+  "OSM": osm,
+  "衛星": esri
+}).addTo(map);
+
+
+// ===== ラベル（最前面） =====
 map.createPane('labelsPane');
 map.getPane('labelsPane').style.zIndex = 650;
 map.getPane('labelsPane').style.pointerEvents = 'none';
 
-// ===== ラベル（透明扱い） =====
 var labels = L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  {
-    attribution: '© OpenStreetMap',
-    pane: 'labelsPane'
-  }
+  'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png',
+  { pane: 'labelsPane' }
 ).addTo(map);
-
-// ===== ベースマップ =====
-var osm = L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  { attribution: '© OpenStreetMap' }
-).addTo(map);
-
-// 衛星
-var esri = L.tileLayer(
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-  { attribution: 'Tiles © Esri' }
-);
-
-// ⭐ ラベル（地名）専用レイヤ（常に上に表示）
-var labels = L.tileLayer(
-  'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-  { attribution: '© OpenStreetMap' }
-).addTo(map);
-
-// ベースマップ切替
-var baseMaps = {
-  "OSM": osm,
-  "衛星": esri
-};
-
-L.control.layers(baseMaps).addTo(map);
 
 
 // ===== 状態管理 =====
@@ -87,6 +94,14 @@ document.getElementById("opacitySlider").addEventListener("input", function(e) {
   }
 });
 
+// ===== ラベルON/OFF =====
+document.getElementById("labelToggle").addEventListener("change", function(e) {
+  if (e.target.checked) {
+    map.addLayer(labels);
+  } else {
+    map.removeLayer(labels);
+  }
+});
 
 // ===== レイヤ切替時 =====
 map.on('overlayadd', function(e) {
@@ -94,7 +109,7 @@ map.on('overlayadd', function(e) {
 });
 
 
-// ===== エリアデータ =====
+// ===== データ =====
 var areaData = {
 
   "Huanipaca": {
@@ -128,29 +143,27 @@ function showArea(area) {
 
   var data = areaData[area];
 
-  // ① ラスタ削除
+  // 削除
   currentLayers.forEach(layer => map.removeLayer(layer));
   currentLayers = [];
 
-  // ② Boundary削除
   if (boundaryLayer) {
     map.removeLayer(boundaryLayer);
   }
 
-  // ③ ズーム
+  // ズーム
   map.fitBounds(data.bounds);
 
-  // ④ ラスタ作成
+  // ラスタ
   var fire = L.imageOverlay(data.fire, data.bounds, {opacity:0.6});
   var water = L.imageOverlay(data.water, data.bounds, {opacity:0.6});
   var deg = L.imageOverlay(data.degradation, data.bounds, {opacity:0.6});
 
-  // ⑤ 初期表示
   fire.addTo(map);
   currentLayers.push(fire);
   activeLayer = fire;
 
-  // ⑥ レイヤ切替UI
+  // レイヤUI
   var overlays = {
     "火災リスク": fire,
     "水資源": water,
@@ -163,20 +176,16 @@ function showArea(area) {
 
   window.layerControlOverlay = L.control.layers(null, overlays).addTo(map);
 
-  // ⑦ Boundary
+  // Boundary
   fetch(data.boundary)
     .then(res => res.json())
     .then(geojson => {
       boundaryLayer = L.geoJSON(geojson, {
-        style: {
-          color: "red",
-          weight: 2,
-          fill: false
-        }
+        style: { color: "red", weight: 2, fill: false }
       }).addTo(map).bringToFront();
     });
 
-  // ⭐ ラベルを最前面に
+  // ラベル最前面
   labels.bringToFront();
 }
 
