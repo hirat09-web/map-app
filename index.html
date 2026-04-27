@@ -33,6 +33,20 @@
 // ===== 地図作成 =====
 var map = L.map('map').setView([-13.5, -72.5], 8);
 
+// ===== Pane作成 =====
+map.createPane('labelsPane');
+map.getPane('labelsPane').style.zIndex = 650;
+map.getPane('labelsPane').style.pointerEvents = 'none';
+
+// ===== ラベル（透明扱い） =====
+var labels = L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    attribution: '© OpenStreetMap',
+    pane: 'labelsPane'
+  }
+).addTo(map);
+
 // ===== ベースマップ =====
 var osm = L.tileLayer(
   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
