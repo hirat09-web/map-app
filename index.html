@@ -1,74 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+#map { height: 100vh; }
+</style>
+</head>
+
+<body>
+
+<!-- ===== ボタン ===== -->
 <div style="position:absolute; top:10px; left:10px; z-index:1000;">
-  <button onclick="showArea('Huanipaca')">エリアHuanipaca</button>
-  <button onclick="showArea('B')">エリアB</button>
-  <button onclick="showArea('C')">エリアC</button>
+  <button onclick="showArea('Huanipaca')">Huanipaca</button>
+  <button onclick="showArea('Yanatile')">Yanatile</button>
+  <button onclick="showArea('SJO')">San Juan del Oro</button>
 </div>
 
+<!-- ===== 地図 ===== -->
+<div id="map"></div>
+
 <script>
-// ===== レイヤ格納 =====
-var layers = {};
 
-// ===== 現在表示中のレイヤ =====
+// ===== 地図作成 =====
+var map = L.map('map').setView([-13.5, -72.5], 8);
+
+// ===== ベースマップ =====
+var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap'
+}).addTo(map);
+
+// ⭐ ESRI衛星
+var esri = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  { attribution: 'Tiles © Esri' }
+);
+
+// ベースマップ切替
+var baseMaps = {
+  "OSM": osm,
+  "衛星": esri
+};
+
+L.control.layers(baseMaps).addTo(map);
+
+
+// ===== レイヤ管理 =====
 var currentLayers = [];
+var boundaryLayer;
 
-// ===== エリアごとのデータ =====
+
+// ===== エリアデータ =====
 var areaData = {
 
   "Huanipaca": {
     bounds: [[-13.58,-73.17],[-13.38,-72.83]],
     fire: 'Huanipaca_fire.png',
     water: 'Huanipaca_water.png',
-    degradation: 'Huanipaca_degradation.png'
+    degradation: 'Huanipaca_degradation.png',
+    boundary: 'Huanipaca.geojson'
   },
 
-  "B": {
-    bounds: [[35.80,139.80],[36.00,140.00]],
-    fire: 'B_fire.png',
-    water: 'B_water.png',
-    degradation: 'B_degradation.png'
+  "Yanatile": {
+    bounds: [[-13.03,-72.38],[-12.50,-71.82]],
+    fire: 'Yanatile_fire.png',
+    water: 'Yanatile_water.png',
+    degradation: 'Yanatile_degradation.png',
+    boundary: 'Yanatile.geojson'
   },
 
-  "C": {
-    bounds: [[36.20,140.10],[36.40,140.30]],
-    fire: 'C_fire.png',
-    water: 'C_water.png',
-    degradation: 'C_degradation.png'
+  "SJO": {
+    bounds: [[-14.27,-69.22],[-14.13,-68.96]],
+    fire: 'SJO_fire.png',
+    water: 'SJO_water.png',
+    degradation: 'SJO_degradation.png',
+    boundary: 'SJO.geojson'
   }
 };
 
-// ===== エリア表示関数 =====
-function showArea(area) {
 
-  // ① 前のレイヤ削除
-  currentLayers.forEach(layer => map.removeLayer(layer));
-  currentLayers = [];
+// ===== エリア表示 =====
+function showArea(area) {
 
   var data = areaData[area];
 
-  // ② ズーム
-  map.fitBounds(data.bounds);
+  // ① ラスタ削除
+  currentLayers.forEach(layer => map.removeLayer(layer));
+  currentLayers = [];
 
-  // ③ ラスタ作成
-  var fireLayer = L.imageOverlay(data.fire, data.bounds, {opacity:0.6});
-  var waterLayer = L.imageOverlay(data.water, data.bounds, {opacity:0.6});
-  var degLayer = L.imageOverlay(data.degradation, data.bounds, {opacity:0.6});
-
-  // ④ レイヤ保存
-  layers = {
-    "火災リスク": fireLayer,
-    "水資源": waterLayer,
-    "森林劣化": degLayer
-  };
-
-  // ⑤ コントロール更新
-  if (window.layerControl) {
-    map.removeControl(window.layerControl);
+  // ② Boundary削除
+  if (boundaryLayer) {
+    map.removeLayer(boundaryLayer);
   }
 
-  window.layerControl = L.control.layers(null, layers).addTo(map);
+  // ③ ズーム
+  map.fitBounds(data.bounds);
 
-  // ⑥ 初期表示（例：火災）
-  fireLayer.addTo(map);
-  currentLayers.push(fireLayer);
+  // ④ ラスタ作成
+  var fire = L.imageOverlay(data.fire, data.bounds, {opacity:0.6});
+  var water = L.imageOverlay(data.water, data.bounds, {opacity:0.6});
+  var deg = L.imageOverlay(data.degradation, data.bounds, {opacity:0.6});
+
+  // ⑤ 表示（初期：火災）
+  fire.addTo(map);
+  currentLayers.push(fire);
+
+  // ⑥ レイヤ切替
+  var overlays = {
+    "火災リスク": fire,
+    "水資源": water,
+    "森林劣化": deg
+  };
+
+  if (window.layerControlOverlay) {
+    map.removeControl(window.layerControlOverlay);
+  }
+
+  window.layerControlOverlay = L.control.layers(null, overlays).addTo(map);
+
+  // ⑦ Boundary読み込み
+  fetch(data.boundary)
+    .then(res => res.json())
+    .then(geojson => {
+      boundaryLayer = L.geoJSON(geojson, {
+        style: {
+          color: "red",
+          weight: 2,
+          fill: false
+        }
+      }).addTo(map);
+    });
+
 }
+
 </script>
+
+</body>
+</html>
