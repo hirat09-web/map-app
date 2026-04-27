@@ -1,27 +1,74 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<style>
-#map { height: 100vh; }
-</style>
-</head>
-<body>
-
-<div id="map"></div>
+<div style="position:absolute; top:10px; left:10px; z-index:1000;">
+  <button onclick="showArea('Huanipaca')">エリアHuanipaca</button>
+  <button onclick="showArea('B')">エリアB</button>
+  <button onclick="showArea('C')">エリアC</button>
+</div>
 
 <script>
-// 地図作成
-var map = L.map('map').setView([36.0, 140.0], 13);
+// ===== レイヤ格納 =====
+var layers = {};
 
-// OSM表示
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap'
-}).addTo(map);
+// ===== 現在表示中のレイヤ =====
+var currentLayers = [];
 
+// ===== エリアごとのデータ =====
+var areaData = {
+
+  "Huanipaca": {
+    bounds: [[-13.58,-73.17],[-13.38,-72.83]],
+    fire: 'Huanipaca_fire.png',
+    water: 'Huanipaca_water.png',
+    degradation: 'Huanipaca_degradation.png'
+  },
+
+  "B": {
+    bounds: [[35.80,139.80],[36.00,140.00]],
+    fire: 'B_fire.png',
+    water: 'B_water.png',
+    degradation: 'B_degradation.png'
+  },
+
+  "C": {
+    bounds: [[36.20,140.10],[36.40,140.30]],
+    fire: 'C_fire.png',
+    water: 'C_water.png',
+    degradation: 'C_degradation.png'
+  }
+};
+
+// ===== エリア表示関数 =====
+function showArea(area) {
+
+  // ① 前のレイヤ削除
+  currentLayers.forEach(layer => map.removeLayer(layer));
+  currentLayers = [];
+
+  var data = areaData[area];
+
+  // ② ズーム
+  map.fitBounds(data.bounds);
+
+  // ③ ラスタ作成
+  var fireLayer = L.imageOverlay(data.fire, data.bounds, {opacity:0.6});
+  var waterLayer = L.imageOverlay(data.water, data.bounds, {opacity:0.6});
+  var degLayer = L.imageOverlay(data.degradation, data.bounds, {opacity:0.6});
+
+  // ④ レイヤ保存
+  layers = {
+    "火災リスク": fireLayer,
+    "水資源": waterLayer,
+    "森林劣化": degLayer
+  };
+
+  // ⑤ コントロール更新
+  if (window.layerControl) {
+    map.removeControl(window.layerControl);
+  }
+
+  window.layerControl = L.control.layers(null, layers).addTo(map);
+
+  // ⑥ 初期表示（例：火災）
+  fireLayer.addTo(map);
+  currentLayers.push(fireLayer);
+}
 </script>
-
-</body>
-</html>
