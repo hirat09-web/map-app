@@ -1,10 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="utf-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Boundary Map</title>
+
+<link
+rel="stylesheet"
+href="leaflet.css"
+/>
+
+<script src="leaflet.js"></script>
+
+<style>
+
+html,
+body {
+
+  margin:0;
+  padding:0;
+  height:100%;
+
+}
+
+#map {
+
+  width:100%;
+  height:100vh;
+
+}
+
+/* ================= UI ================= */
+
+.control-box {
+
+  position:absolute;
+
+  top:10px;
+  left:10px;
+
+  z-index:1000;
+
+  background:white;
+
+  padding:10px;
+
+  border-radius:10px;
+
+  box-shadow:0 2px 10px rgba(0,0,0,0.3);
+
+  font-family:Arial;
+
+  width:220px;
+}
+
+button {
+
+  width:100%;
+
+  margin:5px 0;
+
+  padding:10px;
+
+  font-size:16px;
+
+  cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- ================= UI ================= -->
+
+<div class="control-box">
+
+<b>District</b>
+
+<button onclick="showArea('Huanipaca')">
+
+Huanipaca
+
+</button>
+
+<button onclick="showArea('Yanatile')">
+
+Yanatile
+
+</button>
+
+<button onclick="showArea('SJO')">
+
+San Juan del Oro
+
+</button>
+
+</div>
+
+<!-- ================= 地図 ================= -->
+
+<div id="map"></div>
+
 <script>
 
 // ================= 地図 =================
 
 var map = L.map('map')
 
-.setView([-13.5, -72.5], 8);
+.setView([-13.5, -72.5], 7);
+
+// ================= OpenStreetMap =================
 
 L.tileLayer(
 
@@ -26,7 +138,10 @@ var areaData = {
 
   "Huanipaca": {
 
-    bounds:[[-13.58,-73.17],[-13.38,-72.83]],
+    bounds:[
+      [-13.58,-73.17],
+      [-13.38,-72.83]
+    ],
 
     boundary:'Huanipaca.geojson'
 
@@ -34,7 +149,10 @@ var areaData = {
 
   "Yanatile": {
 
-    bounds:[[-13.03,-72.38],[-12.50,-71.82]],
+    bounds:[
+      [-13.03,-72.38],
+      [-12.50,-71.82]
+    ],
 
     boundary:'Yanatile.geojson'
 
@@ -42,7 +160,10 @@ var areaData = {
 
   "SJO": {
 
-    bounds:[[-14.27,-69.22],[-14.13,-68.96]],
+    bounds:[
+      [-14.27,-69.22],
+      [-14.13,-68.96]
+    ],
 
     boundary:'SJO.geojson'
 
@@ -56,7 +177,11 @@ function showArea(area){
 
   var data = areaData[area];
 
+  // ===== ズーム =====
+
   map.fitBounds(data.bounds);
+
+  // ===== 既存境界削除 =====
 
   if(boundaryLayer){
 
@@ -64,28 +189,55 @@ function showArea(area){
 
   }
 
+  // ===== GeoJSON読込 =====
+
   fetch(data.boundary)
 
-  .then(res => res.json())
+  .then(function(response){
 
-  .then(geojson => {
+    return response.json();
 
-    boundaryLayer = L.geoJSON(geojson, {
+  })
 
-      style:{
+  .then(function(geojson){
 
-        color:"red",
+    boundaryLayer = L.geoJSON(
 
-        weight:2,
+      geojson,
 
-        fillOpacity:0
+      {
+
+        style:{
+
+          color:"red",
+
+          weight:3,
+
+          fillOpacity:0
+
+        }
 
       }
 
-    }).addTo(map);
+    ).addTo(map);
+
+  })
+
+  .catch(function(error){
+
+    console.log(error);
+
+    alert(
+      "GeoJSON loading error:\n" +
+      data.boundary
+    );
 
   });
 
 }
 
 </script>
+
+</body>
+
+</html>
