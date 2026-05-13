@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Fire Monitoring Map</title>
+
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
@@ -21,31 +23,47 @@ html, body {
   height:100vh;
 }
 
-/* ===== UI ===== */
+/* ================= UI ================= */
 
 .control-box {
+
   position:absolute;
   top:10px;
   left:10px;
+
   z-index:1000;
+
   background:white;
+
   padding:10px;
+
   border-radius:10px;
+
   box-shadow:0 2px 10px rgba(0,0,0,0.3);
-  max-width:240px;
+
+  width:240px;
+
   font-family:Arial;
 }
 
+/* 最初から表示 */
+
 #panelContent {
-  display:none;
+  display:block;
   margin-top:10px;
 }
 
 button {
+
   width:100%;
+
   margin:5px 0;
+
   padding:10px;
+
   font-size:16px;
+
+  cursor:pointer;
 }
 
 input[type=range] {
@@ -53,27 +71,43 @@ input[type=range] {
 }
 
 .year-list {
+
   max-height:180px;
+
   overflow-y:auto;
+
   border:1px solid #ccc;
+
   padding:5px;
+
   margin-top:5px;
 }
 
 .legend {
+
   background:white;
+
   padding:8px;
+
   line-height:18px;
+
   color:#333;
+
   border-radius:8px;
+
   box-shadow:0 0 10px rgba(0,0,0,0.2);
 }
 
 .legend i {
+
   width:18px;
+
   height:18px;
+
   float:left;
+
   margin-right:8px;
+
   opacity:0.8;
 }
 
@@ -86,7 +120,9 @@ input[type=range] {
 
 <div class="control-box">
 
-<button onclick="togglePanel()">☰ Menú</button>
+<button onclick="togglePanel()">
+☰ Menú
+</button>
 
 <div id="panelContent">
 
@@ -118,10 +154,13 @@ id="opacitySlider">
 <hr>
 
 <label>
+
 <input type="checkbox"
 id="labelToggle"
 checked>
+
 Nombre del lugar
+
 </label>
 
 <hr>
@@ -167,7 +206,7 @@ L.control.zoom({
   position:'bottomright'
 }).addTo(map);
 
-// ================= ベース =================
+// ================= ベースマップ =================
 
 var osm = L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
@@ -187,6 +226,7 @@ L.control.layers({
 map.createPane('labelsPane');
 
 map.getPane('labelsPane').style.zIndex = 650;
+
 map.getPane('labelsPane').style.pointerEvents = 'none';
 
 var labels = L.tileLayer(
@@ -197,8 +237,8 @@ var labels = L.tileLayer(
 
 // ================= 状態 =================
 
-var currentLayers = [];
-var boundaryLayer;
+var boundaryLayer = null;
+
 var currentArea = null;
 
 var fireLayers = [];
@@ -224,41 +264,39 @@ var fireColors = {
 var areaData = {
 
 "Huanipaca": {
+
   bounds:[[-13.58,-73.17],[-13.38,-72.83]],
-  fire:'Huanipaca_fire.png',
-  water:'Huanipaca_water.png',
-  degradation:'Huanipaca_degradation.png',
+
   boundary:'Huanipaca.geojson'
+
 },
 
 "Yanatile": {
+
   bounds:[[-13.03,-72.38],[-12.50,-71.82]],
-  fire:'Yanatile_fire.png',
-  water:'Yanatile_water.png',
-  degradation:'Yanatile_degradation.png',
+
   boundary:'Yanatile.geojson'
+
 },
 
 "SJO": {
+
   bounds:[[-14.27,-69.22],[-14.13,-68.96]],
-  fire:'SJO_fire.png',
-  water:'SJO_water.png',
-  degradation:'SJO_degradation.png',
+
   boundary:'SJO.geojson'
+
 }
 
 };
 
-// ================= UI =================
+// ================= メニュー =================
 
 function togglePanel() {
 
-  var panel = document.getElementById("panelContent");
+  var panel =
+    document.getElementById("panelContent");
 
-  if (
-    panel.style.display === "none" ||
-    panel.style.display === ""
-  ) {
+  if(panel.style.display === "none") {
 
     panel.style.display = "block";
 
@@ -267,17 +305,23 @@ function togglePanel() {
     panel.style.display = "none";
 
   }
+
 }
 
 // ================= ラベル =================
 
 document.getElementById("labelToggle")
+
 .addEventListener("change", function(e){
 
   if(e.target.checked){
+
     map.addLayer(labels);
+
   } else {
+
     map.removeLayer(labels);
+
   }
 
 });
@@ -285,15 +329,19 @@ document.getElementById("labelToggle")
 // ================= 透明度 =================
 
 document.getElementById("opacitySlider")
+
 .addEventListener("input", function(e){
 
-  var opacity = parseFloat(e.target.value);
+  var opacity =
+    parseFloat(e.target.value);
 
   fireLayers.forEach(layer => {
 
     layer.setStyle({
+
       fillOpacity:opacity,
       opacity:opacity
+
     });
 
   });
@@ -306,54 +354,17 @@ function showArea(area){
 
   currentArea = area;
 
-  var data = areaData[area];
-
-  currentLayers.forEach(layer => {
-    map.removeLayer(layer);
-  });
-
-  currentLayers = [];
-
   clearFires();
 
-  if(boundaryLayer){
-    map.removeLayer(boundaryLayer);
-  }
+  var data = areaData[area];
 
   map.fitBounds(data.bounds);
 
-  var fire = L.imageOverlay(
-    data.fire,
-    data.bounds,
-    {opacity:0.6}
-  );
+  if(boundaryLayer){
 
-  var water = L.imageOverlay(
-    data.water,
-    data.bounds,
-    {opacity:0.6}
-  );
+    map.removeLayer(boundaryLayer);
 
-  var deg = L.imageOverlay(
-    data.degradation,
-    data.bounds,
-    {opacity:0.6}
-  );
-
-  var overlays = {
-
-    "Riesgo de incendio":fire,
-    "Recursos hídricos":water,
-    "Degradación":deg
-
-  };
-
-  if(window.layerControlOverlay){
-    map.removeControl(window.layerControlOverlay);
   }
-
-  window.layerControlOverlay =
-    L.control.layers(null, overlays).addTo(map);
 
   fetch(data.boundary)
 
@@ -364,16 +375,20 @@ function showArea(area){
     boundaryLayer = L.geoJSON(geojson, {
 
       style:{
+
         color:"red",
+
         weight:2,
+
         fill:false
+
       }
 
-    }).addTo(map).bringToFront();
+    }).addTo(map);
+
+    boundaryLayer.bringToFront();
 
   });
-
-  labels.bringToFront();
 
 }
 
@@ -391,6 +406,7 @@ function loadSelectedFires(){
   clearFires();
 
   var checkedYears =
+
     document.querySelectorAll(
       '.year-list input:checked'
     );
@@ -400,6 +416,7 @@ function loadSelectedFires(){
     var year = item.value;
 
     var path =
+
       'fires/' +
       currentArea +
       '_fire_' +
@@ -408,27 +425,41 @@ function loadSelectedFires(){
 
     fetch(path)
 
-    .then(res => res.json())
+    .then(res => {
+
+      if(!res.ok){
+
+        throw new Error(path);
+
+      }
+
+      return res.json();
+
+    })
 
     .then(data => {
 
-      var color = fireColors[year];
+      var color =
+        fireColors[year];
 
       var layer = L.geoJSON(data, {
 
-        style:function(feature){
+        style:function(){
 
           return {
 
             color:color,
+
             weight:1,
 
             fillColor:color,
 
             fillOpacity:parseFloat(
+
               document.getElementById(
                 "opacitySlider"
               ).value
+
             )
 
           };
@@ -448,9 +479,11 @@ function loadSelectedFires(){
             weight:1,
 
             fillOpacity:parseFloat(
+
               document.getElementById(
                 "opacitySlider"
               ).value
+
             )
 
           });
@@ -460,7 +493,9 @@ function loadSelectedFires(){
         onEachFeature:function(feature, layer){
 
           layer.bindPopup(
+
             "<b>Año:</b> " + year
+
           );
 
         }
@@ -472,7 +507,9 @@ function loadSelectedFires(){
       layer.bringToFront();
 
       if(boundaryLayer){
+
         boundaryLayer.bringToFront();
+
       }
 
       labels.bringToFront();
@@ -484,7 +521,7 @@ function loadSelectedFires(){
       console.log(err);
 
       alert(
-        "No se pudo cargar: " + path
+        "No se pudo cargar:\n" + path
       );
 
     });
@@ -520,15 +557,19 @@ legend.onAdd = function(map){
     'legend'
   );
 
-  div.innerHTML += "<b>Incendios</b><br>";
+  div.innerHTML +=
+    "<b>Incendios</b><br>";
 
   for(var year in fireColors){
 
     div.innerHTML +=
+
       '<i style="background:' +
       fireColors[year] +
       '"></i> ' +
+
       year +
+
       '<br>';
 
   }
