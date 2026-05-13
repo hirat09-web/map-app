@@ -269,29 +269,47 @@ var fireColors = {
 
 var areaData = {
 
-"Huanipaca": {
+  "Huanipaca": {
 
-  bounds:[[-13.58,-73.17],[-13.38,-72.83]],
+    bounds:[[-13.58,-73.17],[-13.38,-72.83]],
 
-  boundary:'Huanipaca.geojson'
+    fire:'Huanipaca_fire.png',
 
-},
+    water:'Huanipaca_water.png',
 
-"Yanatile": {
+    degradation:'Huanipaca_degradation.png',
 
-  bounds:[[-13.03,-72.38],[-12.50,-71.82]],
+    boundary:'Huanipaca.geojson'
 
-  boundary:'Yanatile.geojson'
+  },
 
-},
+  "Yanatile": {
 
-"SJO": {
+    bounds:[[-13.03,-72.38],[-12.50,-71.82]],
 
-  bounds:[[-14.27,-69.22],[-14.13,-68.96]],
+    fire:'Yanatile_fire.png',
 
-  boundary:'SJO.geojson'
+    water:'Yanatile_water.png',
 
-}
+    degradation:'Yanatile_degradation.png',
+
+    boundary:'Yanatile.geojson'
+
+  },
+
+  "SJO": {
+
+    bounds:[[-14.27,-69.22],[-14.13,-68.96]],
+
+    fire:'SJO_fire.png',
+
+    water:'SJO_water.png',
+
+    degradation:'SJO_degradation.png',
+
+    boundary:'SJO.geojson'
+
+  }
 
 };
 
@@ -366,11 +384,135 @@ function showArea(area){
 
   map.fitBounds(data.bounds);
 
+  // 既存境界削除
   if(boundaryLayer){
 
     map.removeLayer(boundaryLayer);
 
   }
+
+  // 既存オーバーレイ削除
+  if(window.fireRiskLayer){
+
+    map.removeLayer(window.fireRiskLayer);
+
+  }
+
+  if(window.waterLayer){
+
+    map.removeLayer(window.waterLayer);
+
+  }
+
+  if(window.degradationLayer){
+
+    map.removeLayer(window.degradationLayer);
+
+  }
+
+  // ================= 火災リスク =================
+
+  window.fireRiskLayer = L.imageOverlay(
+
+    data.fire,
+    data.bounds,
+
+    {
+      opacity:0.6
+    }
+
+  );
+
+  // ================= 水資源 =================
+
+  window.waterLayer = L.imageOverlay(
+
+    data.water,
+    data.bounds,
+
+    {
+      opacity:0.6
+    }
+
+  );
+
+  // ================= 森林劣化 =================
+
+  window.degradationLayer = L.imageOverlay(
+
+    data.degradation,
+    data.bounds,
+
+    {
+      opacity:0.6
+    }
+
+  );
+
+  // ================= レイヤ選択 =================
+
+  var overlays = {
+
+    "Riesgo de incendio":
+      window.fireRiskLayer,
+
+    "Recursos hídricos":
+      window.waterLayer,
+
+    "Degradación":
+      window.degradationLayer
+
+  };
+
+  // 古いレイヤコントロール削除
+  if(window.layerControlOverlay){
+
+    map.removeControl(
+      window.layerControlOverlay
+    );
+
+  }
+
+  // 新規追加
+  window.layerControlOverlay =
+
+    L.control.layers(
+      null,
+      overlays
+    ).addTo(map);
+
+  // 初期表示
+  window.fireRiskLayer.addTo(map);
+
+  // ================= 境界 =================
+
+  fetch(data.boundary)
+
+  .then(res => res.json())
+
+  .then(geojson => {
+
+    boundaryLayer = L.geoJSON(geojson, {
+
+      style:{
+
+        color:"red",
+
+        weight:2,
+
+        fill:false
+
+      }
+
+    }).addTo(map);
+
+    boundaryLayer.bringToFront();
+
+  });
+
+  labels.bringToFront();
+
+}
 
   fetch(data.boundary)
 
