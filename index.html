@@ -72,7 +72,7 @@ input[type=range] {
 
 .year-list {
 
-  max-height:180px;
+  max-height:120px;
 
   overflow-y:auto;
 
@@ -85,7 +85,7 @@ input[type=range] {
 
 .legend {
 
-  background:white;
+  background:rgba(255,255,255,0.9);
 
   padding:8px;
 
@@ -96,6 +96,12 @@ input[type=range] {
   border-radius:8px;
 
   box-shadow:0 0 10px rgba(0,0,0,0.2);
+
+  max-height:180px;
+
+  overflow-y:auto;
+
+  font-size:14px;
 }
 
 .legend i {
@@ -547,7 +553,7 @@ function clearFires(){
 // ================= 凡例 =================
 
 var legend = L.control({
-  position:'bottomleft'
+  position:'bottomright'
 });
 
 legend.onAdd = function(map){
