@@ -8,7 +8,7 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0">
 
-<title>Boundary Map</title>
+<title>Forest Monitoring Map</title>
 
 <link
 rel="stylesheet"
@@ -54,9 +54,13 @@ body {
 
   box-shadow:0 2px 10px rgba(0,0,0,0.3);
 
+  width:240px;
+
   font-family:Arial;
 
-  width:220px;
+  max-height:90vh;
+
+  overflow-y:auto;
 }
 
 button {
@@ -72,6 +76,50 @@ button {
   cursor:pointer;
 }
 
+input[type=range] {
+
+  width:100%;
+}
+
+.year-list {
+
+  border:1px solid #ccc;
+
+  padding:5px;
+
+  max-height:180px;
+
+  overflow-y:auto;
+}
+
+.legend {
+
+  background:white;
+
+  padding:8px;
+
+  line-height:18px;
+
+  border-radius:8px;
+
+  box-shadow:0 0 10px rgba(0,0,0,0.2);
+
+  font-size:13px;
+}
+
+.legend i {
+
+  width:18px;
+
+  height:18px;
+
+  float:left;
+
+  margin-right:8px;
+
+  opacity:0.8;
+}
+
 </style>
 
 </head>
@@ -85,21 +133,66 @@ button {
 <b>District</b>
 
 <button onclick="showArea('Huanipaca')">
-
 Huanipaca
-
 </button>
 
 <button onclick="showArea('Yanatile')">
-
 Yanatile
-
 </button>
 
 <button onclick="showArea('SJO')">
-
 San Juan del Oro
+</button>
 
+<hr>
+
+<b>Opacity</b>
+
+<input
+type="range"
+min="0"
+max="1"
+step="0.1"
+value="0.6"
+id="opacitySlider">
+
+<hr>
+
+<label>
+
+<input
+type="checkbox"
+id="labelToggle"
+checked>
+
+Place labels
+
+</label>
+
+<hr>
+
+<b>Fire Years</b>
+
+<div class="year-list">
+
+<label><input type="checkbox" value="2017"> 2017</label><br>
+<label><input type="checkbox" value="2018"> 2018</label><br>
+<label><input type="checkbox" value="2019"> 2019</label><br>
+<label><input type="checkbox" value="2020"> 2020</label><br>
+<label><input type="checkbox" value="2021"> 2021</label><br>
+<label><input type="checkbox" value="2022"> 2022</label><br>
+<label><input type="checkbox" value="2023"> 2023</label><br>
+<label><input type="checkbox" value="2024"> 2024</label><br>
+<label><input type="checkbox" value="2025"> 2025</label><br>
+
+</div>
+
+<button onclick="loadSelectedFires()">
+Show Fires
+</button>
+
+<button onclick="clearFires()">
+Clear Fires
 </button>
 
 </div>
@@ -116,9 +209,9 @@ var map = L.map('map')
 
 .setView([-13.5, -72.5], 7);
 
-// ================= OpenStreetMap =================
+// ================= ベースマップ =================
 
-L.tileLayer(
+var osm = L.tileLayer(
 
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 
@@ -128,9 +221,68 @@ L.tileLayer(
 
 ).addTo(map);
 
+var esri = L.tileLayer(
+
+'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+
+);
+
+L.control.layers({
+
+  "Map":osm,
+  "Satellite":esri
+
+}).addTo(map);
+
+// ================= ラベル =================
+
+map.createPane('labelsPane');
+
+map.getPane('labelsPane').style.zIndex = 650;
+
+map.getPane('labelsPane').style.pointerEvents = 'none';
+
+var labels = L.tileLayer(
+
+'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png',
+
+{
+  pane:'labelsPane'
+}
+
+).addTo(map);
+
 // ================= 状態 =================
 
+var currentArea = null;
+
 var boundaryLayer = null;
+
+var fireRiskLayer = null;
+
+var waterLayer = null;
+
+var degradationLayer = null;
+
+var fireLayers = [];
+
+var overlayControl = null;
+
+// ================= 年別色 =================
+
+var fireColors = {
+
+  2017:"#ffffb2",
+  2018:"#fed976",
+  2019:"#feb24c",
+  2020:"#fd8d3c",
+  2021:"#fc4e2a",
+  2022:"#e31a1c",
+  2023:"#bd0026",
+  2024:"#800026",
+  2025:"#4d0018"
+
+};
 
 // ================= データ =================
 
@@ -143,6 +295,12 @@ var areaData = {
       [-13.38,-72.83]
     ],
 
+    fire:'Huanipaca_fire.png',
+
+    water:'Huanipaca_water.png',
+
+    degradation:'Huanipaca_degradation.png',
+
     boundary:'Huanipaca.geojson'
 
   },
@@ -153,6 +311,12 @@ var areaData = {
       [-13.03,-72.38],
       [-12.50,-71.82]
     ],
+
+    fire:'Yanatile_fire.png',
+
+    water:'Yanatile_water.png',
+
+    degradation:'Yanatile_degradation.png',
 
     boundary:'Yanatile.geojson'
 
@@ -165,23 +329,89 @@ var areaData = {
       [-14.13,-68.96]
     ],
 
+    fire:'SJO_fire.png',
+
+    water:'SJO_water.png',
+
+    degradation:'SJO_degradation.png',
+
     boundary:'SJO.geojson'
 
   }
 
 };
 
+// ================= ラベル ON/OFF =================
+
+document.getElementById("labelToggle")
+
+.addEventListener("change", function(e){
+
+  if(e.target.checked){
+
+    map.addLayer(labels);
+
+  } else {
+
+    map.removeLayer(labels);
+
+  }
+
+});
+
+// ================= 透明度 =================
+
+document.getElementById("opacitySlider")
+
+.addEventListener("input", function(e){
+
+  var opacity =
+    parseFloat(e.target.value);
+
+  if(fireRiskLayer){
+
+    fireRiskLayer.setOpacity(opacity);
+
+  }
+
+  if(waterLayer){
+
+    waterLayer.setOpacity(opacity);
+
+  }
+
+  if(degradationLayer){
+
+    degradationLayer.setOpacity(opacity);
+
+  }
+
+  fireLayers.forEach(layer => {
+
+    layer.setStyle({
+
+      fillOpacity:opacity,
+      opacity:opacity
+
+    });
+
+  });
+
+});
+
 // ================= エリア表示 =================
 
 function showArea(area){
 
-  var data = areaData[area];
+  currentArea = area;
 
-  // ===== ズーム =====
+  clearFires();
+
+  var data = areaData[area];
 
   map.fitBounds(data.bounds);
 
-  // ===== 既存境界削除 =====
+  // ===== 古いレイヤ削除 =====
 
   if(boundaryLayer){
 
@@ -189,7 +419,85 @@ function showArea(area){
 
   }
 
-  // ===== GeoJSON読込 =====
+  if(fireRiskLayer){
+
+    map.removeLayer(fireRiskLayer);
+
+  }
+
+  if(waterLayer){
+
+    map.removeLayer(waterLayer);
+
+  }
+
+  if(degradationLayer){
+
+    map.removeLayer(degradationLayer);
+
+  }
+
+  // ===== PNG Overlay =====
+
+  fireRiskLayer = L.imageOverlay(
+
+    data.fire,
+
+    data.bounds,
+
+    {
+      opacity:0.6
+    }
+
+  ).addTo(map);
+
+  waterLayer = L.imageOverlay(
+
+    data.water,
+
+    data.bounds,
+
+    {
+      opacity:0.6
+    }
+
+  );
+
+  degradationLayer = L.imageOverlay(
+
+    data.degradation,
+
+    data.bounds,
+
+    {
+      opacity:0.6
+    }
+
+  );
+
+  // ===== Overlay Control =====
+
+  if(overlayControl){
+
+    map.removeControl(overlayControl);
+
+  }
+
+  overlayControl = L.control.layers(
+
+    null,
+
+    {
+
+      "Fire Risk":fireRiskLayer,
+      "Water Resources":waterLayer,
+      "Forest Degradation":degradationLayer
+
+    }
+
+  ).addTo(map);
+
+  // ===== Boundary =====
 
   fetch(data.boundary)
 
@@ -221,23 +529,190 @@ function showArea(area){
 
     ).addTo(map);
 
-  })
-
-  .catch(function(error){
-
-    console.log(error);
-
-    alert(
-      "GeoJSON loading error:\n" +
-      data.boundary
-    );
+    boundaryLayer.bringToFront();
 
   });
 
 }
 
+// ================= 火災表示 =================
+
+function loadSelectedFires(){
+
+  if(!currentArea){
+
+    alert("Select district first");
+
+    return;
+  }
+
+  clearFires();
+
+  var checkedYears =
+
+    document.querySelectorAll(
+      '.year-list input:checked'
+    );
+
+  checkedYears.forEach(item => {
+
+    var year = item.value;
+
+    var path =
+
+      'fires/' +
+      currentArea +
+      '_fire_' +
+      year +
+      '.geojson';
+
+    fetch(path)
+
+    .then(function(response){
+
+      if(!response.ok){
+
+        throw new Error(path);
+
+      }
+
+      return response.json();
+
+    })
+
+    .then(function(data){
+
+      var color =
+        fireColors[year];
+
+      var layer = L.geoJSON(data, {
+
+        style:function(){
+
+          return {
+
+            color:color,
+
+            weight:1,
+
+            fillColor:color,
+
+            fillOpacity:parseFloat(
+
+              document.getElementById(
+                "opacitySlider"
+              ).value
+
+            )
+
+          };
+
+        },
+
+        pointToLayer:function(feature, latlng){
+
+          return L.circleMarker(latlng, {
+
+            radius:5,
+
+            fillColor:color,
+
+            color:"#000",
+
+            weight:1,
+
+            fillOpacity:parseFloat(
+
+              document.getElementById(
+                "opacitySlider"
+              ).value
+
+            )
+
+          });
+
+        }
+
+      }).addTo(map);
+
+      fireLayers.push(layer);
+
+      layer.bringToFront();
+
+      if(boundaryLayer){
+
+        boundaryLayer.bringToFront();
+
+      }
+
+    })
+
+    .catch(function(error){
+
+      console.log(error);
+
+      alert(
+        "Cannot load:\n" + path
+      );
+
+    });
+
+  });
+
+}
+
+// ================= 火災削除 =================
+
+function clearFires(){
+
+  fireLayers.forEach(layer => {
+
+    map.removeLayer(layer);
+
+  });
+
+  fireLayers = [];
+
+}
+
+// ================= 凡例 =================
+
+var legend = L.control({
+
+  position:'bottomright'
+
+});
+
+legend.onAdd = function(map){
+
+  var div = L.DomUtil.create(
+    'div',
+    'legend'
+  );
+
+  div.innerHTML +=
+    "<b>Fire Years</b><br>";
+
+  for(var year in fireColors){
+
+    div.innerHTML +=
+
+      '<i style="background:' +
+      fireColors[year] +
+      '"></i>' +
+
+      year +
+
+      '<br>';
+
+  }
+
+  return div;
+};
+
+legend.addTo(map);
+
 </script>
 
 </body>
-
 </html>
