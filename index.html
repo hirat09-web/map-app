@@ -1,205 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Fire Monitoring Map</title>
-
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-<style>
-
-html, body {
-  margin:0;
-  padding:0;
-  height:100%;
-}
-
-#map {
-  height:100vh;
-}
-
-/* ================= UI ================= */
-
-.control-box {
-
-  position:absolute;
-  top:10px;
-  left:10px;
-
-  z-index:1000;
-
-  background:white;
-
-  padding:10px;
-
-  border-radius:10px;
-
-  box-shadow:0 2px 10px rgba(0,0,0,0.3);
-
-  width:240px;
-
-  font-family:Arial;
-}
-
-/* 最初から表示 */
-
-#panelContent {
-  display:block;
-  margin-top:10px;
-}
-
-button {
-
-  width:100%;
-
-  margin:5px 0;
-
-  padding:10px;
-
-  font-size:16px;
-
-  cursor:pointer;
-}
-
-input[type=range] {
-  width:100%;
-}
-
-.year-list {
-
-  max-height:120px;
-
-  overflow-y:auto;
-
-  border:1px solid #ccc;
-
-  padding:5px;
-
-  margin-top:5px;
-}
-
-.legend {
-
-  background:rgba(255,255,255,0.9);
-
-  padding:8px;
-
-  line-height:18px;
-
-  color:#333;
-
-  border-radius:8px;
-
-  box-shadow:0 0 10px rgba(0,0,0,0.2);
-
-  max-height:180px;
-
-  overflow-y:auto;
-
-  font-size:14px;
-}
-
-.legend i {
-
-  width:18px;
-
-  height:18px;
-
-  float:left;
-
-  margin-right:8px;
-
-  opacity:0.8;
-}
-
-</style>
-</head>
-
-<body>
-
-<!-- ================= UI ================= -->
-
-<div class="control-box">
-
-<button onclick="togglePanel()">
-☰ Menú
-</button>
-
-<div id="panelContent">
-
-<b>District</b>
-
-<button onclick="showArea('Huanipaca')">
-Huanipaca
-</button>
-
-<button onclick="showArea('Yanatile')">
-Yanatile
-</button>
-
-<button onclick="showArea('SJO')">
-San Juan del Oro
-</button>
-
-<hr>
-
-<b>Transparencia</b>
-
-<input type="range"
-min="0"
-max="1"
-step="0.1"
-value="0.7"
-id="opacitySlider">
-
-<hr>
-
-<label>
-
-<input type="checkbox"
-id="labelToggle"
-checked>
-
-Nombre del lugar
-
-</label>
-
-<hr>
-
-<b>Años de incendio</b>
-
-<div class="year-list">
-
-<label><input type="checkbox" value="2017"> 2017</label><br>
-<label><input type="checkbox" value="2018"> 2018</label><br>
-<label><input type="checkbox" value="2019"> 2019</label><br>
-<label><input type="checkbox" value="2020"> 2020</label><br>
-<label><input type="checkbox" value="2021"> 2021</label><br>
-<label><input type="checkbox" value="2022"> 2022</label><br>
-<label><input type="checkbox" value="2023"> 2023</label><br>
-<label><input type="checkbox" value="2024"> 2024</label><br>
-<label><input type="checkbox" value="2025"> 2025</label><br>
-
-</div>
-
-<button onclick="loadSelectedFires()">
-Mostrar incendios
-</button>
-
-<button onclick="clearFires()">
-Eliminar incendios
-</button>
-
-</div>
-</div>
-
-<div id="map"></div>
-
 <script>
 
 // ================= 地図 =================
@@ -215,16 +13,16 @@ L.control.zoom({
 // ================= ベースマップ =================
 
 var osm = L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 ).addTo(map);
 
 var esri = L.tileLayer(
-'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 );
 
 L.control.layers({
-  "Mapa":osm,
-  "Satélite":esri
+  "Mapa": osm,
+  "Satélite": esri
 }).addTo(map);
 
 // ================= ラベル =================
@@ -232,22 +30,26 @@ L.control.layers({
 map.createPane('labelsPane');
 
 map.getPane('labelsPane').style.zIndex = 650;
-
 map.getPane('labelsPane').style.pointerEvents = 'none';
 
 var labels = L.tileLayer(
-'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png',
-{
-  pane:'labelsPane'
-}).addTo(map);
+  'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png',
+  {
+    pane:'labelsPane'
+  }
+).addTo(map);
 
 // ================= 状態 =================
 
-var boundaryLayer = null;
-
 var currentArea = null;
 
+var boundaryLayer = null;
+
 var fireLayers = [];
+
+var fireRiskLayer = null;
+var waterLayer = null;
+var degradationLayer = null;
 
 // ================= 年別色 =================
 
@@ -315,12 +117,12 @@ var areaData = {
 
 // ================= メニュー =================
 
-function togglePanel() {
+function togglePanel(){
 
   var panel =
     document.getElementById("panelContent");
 
-  if(panel.style.display === "none") {
+  if(panel.style.display === "none"){
 
     panel.style.display = "block";
 
@@ -332,7 +134,7 @@ function togglePanel() {
 
 }
 
-// ================= ラベル =================
+// ================= ラベル ON/OFF =================
 
 document.getElementById("labelToggle")
 
@@ -370,6 +172,24 @@ document.getElementById("opacitySlider")
 
   });
 
+  if(fireRiskLayer){
+
+    fireRiskLayer.setOpacity(opacity);
+
+  }
+
+  if(waterLayer){
+
+    waterLayer.setOpacity(opacity);
+
+  }
+
+  if(degradationLayer){
+
+    degradationLayer.setOpacity(opacity);
+
+  }
+
 });
 
 // ================= エリア表示 =================
@@ -384,7 +204,7 @@ function showArea(area){
 
   map.fitBounds(data.bounds);
 
-  // ================= 既存削除 =================
+  // ===== 古い境界削除 =====
 
   if(boundaryLayer){
 
@@ -392,27 +212,29 @@ function showArea(area){
 
   }
 
-  if(window.fireRiskLayer){
+  // ===== 古い画像削除 =====
 
-    map.removeLayer(window.fireRiskLayer);
+  if(fireRiskLayer){
 
-  }
-
-  if(window.waterLayer){
-
-    map.removeLayer(window.waterLayer);
+    map.removeLayer(fireRiskLayer);
 
   }
 
-  if(window.degradationLayer){
+  if(waterLayer){
 
-    map.removeLayer(window.degradationLayer);
+    map.removeLayer(waterLayer);
 
   }
 
-  // ================= 火災リスク =================
+  if(degradationLayer){
 
-  window.fireRiskLayer = L.imageOverlay(
+    map.removeLayer(degradationLayer);
+
+  }
+
+  // ===== 火災リスク =====
+
+  fireRiskLayer = L.imageOverlay(
 
     data.fire,
 
@@ -424,9 +246,9 @@ function showArea(area){
 
   ).addTo(map);
 
-  // ================= 水資源 =================
+  // ===== 水資源 =====
 
-  window.waterLayer = L.imageOverlay(
+  waterLayer = L.imageOverlay(
 
     data.water,
 
@@ -438,9 +260,9 @@ function showArea(area){
 
   );
 
-  // ================= 森林劣化 =================
+  // ===== 森林劣化 =====
 
-  window.degradationLayer = L.imageOverlay(
+  degradationLayer = L.imageOverlay(
 
     data.degradation,
 
@@ -452,39 +274,37 @@ function showArea(area){
 
   );
 
-  // ================= レイヤ一覧 =================
+  // ===== レイヤ切替 =====
 
   var overlays = {
 
     "Riesgo de incendio":
-      window.fireRiskLayer,
+      fireRiskLayer,
 
     "Recursos hídricos":
-      window.waterLayer,
+      waterLayer,
 
     "Degradación":
-      window.degradationLayer
+      degradationLayer
 
   };
 
-  // 古いレイヤコントロール削除
-  if(window.layerControlOverlay){
+  if(window.overlayControl){
 
     map.removeControl(
-      window.layerControlOverlay
+      window.overlayControl
     );
 
   }
 
-  // 新しいレイヤコントロール
-  window.layerControlOverlay =
+  window.overlayControl =
 
     L.control.layers(
       null,
       overlays
     ).addTo(map);
 
-  // ================= 境界 =================
+  // ===== 境界 =====
 
   fetch(data.boundary)
 
@@ -511,155 +331,6 @@ function showArea(area){
   });
 
   labels.bringToFront();
-
-}
-
-  // 既存オーバーレイ削除
-  if(window.fireRiskLayer){
-
-    map.removeLayer(window.fireRiskLayer);
-
-  }
-
-  if(window.waterLayer){
-
-    map.removeLayer(window.waterLayer);
-
-  }
-
-  if(window.degradationLayer){
-
-    map.removeLayer(window.degradationLayer);
-
-  }
-
-  // ================= 火災リスク =================
-
-  window.fireRiskLayer = L.imageOverlay(
-
-    data.fire,
-    data.bounds,
-
-    {
-      opacity:0.6
-    }
-
-  );
-
-  // ================= 水資源 =================
-
-  window.waterLayer = L.imageOverlay(
-
-    data.water,
-    data.bounds,
-
-    {
-      opacity:0.6
-    }
-
-  );
-
-  // ================= 森林劣化 =================
-
-  window.degradationLayer = L.imageOverlay(
-
-    data.degradation,
-    data.bounds,
-
-    {
-      opacity:0.6
-    }
-
-  );
-
-  // ================= レイヤ選択 =================
-
-  var overlays = {
-
-    "Riesgo de incendio":
-      window.fireRiskLayer,
-
-    "Recursos hídricos":
-      window.waterLayer,
-
-    "Degradación":
-      window.degradationLayer
-
-  };
-
-  // 古いレイヤコントロール削除
-  if(window.layerControlOverlay){
-
-    map.removeControl(
-      window.layerControlOverlay
-    );
-
-  }
-
-  // 新規追加
-  window.layerControlOverlay =
-
-    L.control.layers(
-      null,
-      overlays
-    ).addTo(map);
-
-  // 初期表示
-  window.fireRiskLayer.addTo(map);
-
-  // ================= 境界 =================
-
-  fetch(data.boundary)
-
-  .then(res => res.json())
-
-  .then(geojson => {
-
-    boundaryLayer = L.geoJSON(geojson, {
-
-      style:{
-
-        color:"red",
-
-        weight:2,
-
-        fill:false
-
-      }
-
-    }).addTo(map);
-
-    boundaryLayer.bringToFront();
-
-  });
-
-  labels.bringToFront();
-
-}
-
-  fetch(data.boundary)
-
-  .then(res => res.json())
-
-  .then(geojson => {
-
-    boundaryLayer = L.geoJSON(geojson, {
-
-      style:{
-
-        color:"red",
-
-        weight:2,
-
-        fill:false
-
-      }
-
-    }).addTo(map);
-
-    boundaryLayer.bringToFront();
-
-  });
 
 }
 
@@ -672,6 +343,7 @@ function loadSelectedFires(){
     alert("Seleccione un distrito.");
 
     return;
+
   }
 
   clearFires();
@@ -846,11 +518,9 @@ legend.onAdd = function(map){
   }
 
   return div;
+
 };
 
 legend.addTo(map);
 
 </script>
-
-</body>
-</html>
