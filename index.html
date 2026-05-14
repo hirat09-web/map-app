@@ -255,17 +255,12 @@ var labels = L.tileLayer(
 // ================= 状態 =================
 
 var currentArea = null;
-
 var boundaryLayer = null;
-
 var fireRiskLayer = null;
-
 var waterLayer = null;
-
 var degradationLayer = null;
-
+var landuseLayer = null;
 var fireLayers = [];
-
 var overlayControl = null;
 
 // ================= 年別色 =================
@@ -301,6 +296,8 @@ var areaData = {
 
     degradation:'Huanipaca_degradation.png',
 
+    landuse:'Huanipaca_landuse.png',
+
     boundary:'Huanipaca.geojson'
 
   },
@@ -318,6 +315,8 @@ var areaData = {
 
     degradation:'Yanatile_degradation.png',
 
+    landuse:'Yanatile_landuse.png',
+
     boundary:'Yanatile.geojson'
 
   },
@@ -334,6 +333,8 @@ var areaData = {
     water:'SJO_water.png',
 
     degradation:'SJO_degradation.png',
+
+    landuse:'SJO_landuse.png',
 
     boundary:'SJO.geojson'
 
@@ -437,43 +438,51 @@ function showArea(area){
 
   }
 
-  // ===== PNG Overlay =====
+  if(landuseLayer){
 
-  fireRiskLayer = L.imageOverlay(
+   map.removeLayer(landuseLayer);
 
-    data.fire,
+  }
+  
+// ===== PNG Overlay =====
 
-    data.bounds,
+fireRiskLayer = L.imageOverlay(
+  data.fire,
+  data.bounds,
+  {opacity:0.6}
+);
 
-    {
-      opacity:0.6
-    }
+waterLayer = L.imageOverlay(
+  data.water,
+  data.bounds,
+  {opacity:0.6}
+);
 
-  ).addTo(map);
+degradationLayer = L.imageOverlay(
+  data.degradation,
+  data.bounds,
+  {opacity:0.6}
+);
 
-  waterLayer = L.imageOverlay(
+landuseLayer = L.imageOverlay(
+  data.landuse,
+  data.bounds,
+  {
+    opacity:0.7
+  }
+);
 
-    data.water,
+// 初期表示は火災リスクのみ
+fireRiskLayer.addTo(map);
 
-    data.bounds,
+// 念のため他は削除
+if(map.hasLayer(waterLayer)){
+  map.removeLayer(waterLayer);
+}
 
-    {
-      opacity:0.6
-    }
-
-  );
-
-  degradationLayer = L.imageOverlay(
-
-    data.degradation,
-
-    data.bounds,
-
-    {
-      opacity:0.6
-    }
-
-  );
+if(map.hasLayer(degradationLayer)){
+  map.removeLayer(degradationLayer);
+}
 
   // ===== Overlay Control =====
 
@@ -492,6 +501,7 @@ function showArea(area){
       "Fire Risk":fireRiskLayer,
       "Water Resources":waterLayer,
       "Forest Degradation":degradationLayer
+      "Land Use":landuseLayer
 
     }
 
