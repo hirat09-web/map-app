@@ -387,6 +387,12 @@ document.getElementById("opacitySlider")
 
   }
 
+  if(landuseLayer){
+
+    landuseLayer.setOpacity(opacity);
+
+  }
+
   fireLayers.forEach(layer => {
 
     layer.setStyle({
@@ -443,7 +449,7 @@ function showArea(area){
    map.removeLayer(landuseLayer);
 
   }
-  
+
 // ===== PNG Overlay =====
 
 fireRiskLayer = L.imageOverlay(
@@ -500,7 +506,7 @@ if(map.hasLayer(degradationLayer)){
 
       "Fire Risk":fireRiskLayer,
       "Water Resources":waterLayer,
-      "Forest Degradation":degradationLayer
+      "Forest Degradation":degradationLayer,
       "Land Use":landuseLayer
 
     }
