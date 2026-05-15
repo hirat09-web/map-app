@@ -458,6 +458,16 @@ fireRiskLayer = L.imageOverlay(
   {opacity:0.6}
 );
 
+fireRiskLayer.on('load', function(){
+   console.log("FireRisk loaded");
+});
+
+fireRiskLayer.on('error', function(){
+   console.log("FireRisk ERROR");
+});
+
+fireRiskLayer.addTo(map);
+
 waterLayer = L.imageOverlay(
   data.water,
   data.bounds,
