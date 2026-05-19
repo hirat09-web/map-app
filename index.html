@@ -546,9 +546,7 @@ fireRiskLayer.on('load', function(){
 fireRiskLayer.on('error', function(){
    console.log("FireRisk ERROR");
 });
-
-fireRiskLayer.addTo(map);
-
+    
 waterLayer = L.imageOverlay(
   data.water,
   data.bounds,
@@ -597,10 +595,10 @@ if(map.hasLayer(degradationLayer)){
 
      {
 
-       "🌾 Land Use":landuseLayer
+       "🌾 Land Use":landuseLayer,
        "🌲 Forest Degradation":degradationLayer,
        "🔥 Fire Risk":fireRiskLayer,
-       "💧 Water Resources":waterLayer,
+       "💧 Water Resources":waterLayer
 
      },
 
