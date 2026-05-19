@@ -314,12 +314,6 @@ var esri = L.tileLayer(
 
 );
 
-L.control.layers({
-
-  "Map":osm,
-  "Satellite":esri
-
-}).addTo(map);
 
 // ================= ラベル =================
 
@@ -594,16 +588,27 @@ if(map.hasLayer(degradationLayer)){
 
   overlayControl = L.control.layers(
 
-    null,
+     {
 
-    {
-      "Land Use":landuseLayer
-      "Forest Degradation":degradationLayer,
-      "Fire Risk":fireRiskLayer,
-      "Water Resources":waterLayer,
-    }
+      "🗺 Background Map":osm,
+      "🛰 Satellite":esri
 
-  ).addTo(map);
+     },
+
+     {
+
+       "🌾 Land Use":landuseLayer
+       "🌲 Forest Degradation":degradationLayer,
+       "🔥 Fire Risk":fireRiskLayer,
+       "💧 Water Resources":waterLayer,
+
+     },
+
+     {
+       collapsed: window.innerWidth <=768
+     }
+
+    ).addTo(map);
 
   // ===== Boundary =====
 
