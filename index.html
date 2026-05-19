@@ -575,9 +575,6 @@ landuseLayer = L.imageOverlay(
   }
 );
 
-// 初期表示は火災リスクのみ
-fireRiskLayer.addTo(map);
-
 // 念のため他は削除
 if(map.hasLayer(waterLayer)){
   map.removeLayer(waterLayer);
@@ -600,12 +597,10 @@ if(map.hasLayer(degradationLayer)){
     null,
 
     {
-
+      "Land Use":landuseLayer
+      "Forest Degradation":degradationLayer,
       "Fire Risk":fireRiskLayer,
       "Water Resources":waterLayer,
-      "Forest Degradation":degradationLayer,
-      "Land Use":landuseLayer
-
     }
 
   ).addTo(map);
@@ -660,6 +655,8 @@ if(map.hasLayer(degradationLayer)){
 // ================= 火災表示 =================
 
 function loadSelectedFires(){
+
+  legend.addTo(map);
 
   if(!currentArea){
 
@@ -793,7 +790,9 @@ function clearFires(){
 
   });
 
-  fireLayers = [];
+  fireLayers=[];
+
+  map.removeControl(legend);
 
 }
 
@@ -831,9 +830,6 @@ legend.onAdd = function(map){
 
   return div;
 };
-
-legend.addTo(map);
-
 
 // ================= Menu Open / Close =================
 
