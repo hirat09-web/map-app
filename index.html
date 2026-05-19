@@ -622,6 +622,21 @@ if(map.hasLayer(degradationLayer)){
 
     ).addTo(map);
 
+  // ===== Land Use Legend ON/OFF =====
+
+    landuseLayer.on("add",function(){
+
+       landuseLegend.addTo(map);
+
+    });
+
+    landuseLayer.on("remove",function(){
+
+       map.removeControl(landuseLegend);
+
+    });
+
+
   // ===== Boundary =====
 
   fetch(data.boundary)
@@ -837,7 +852,7 @@ landuseLegend.onAdd=function(map){
 
    '<i style="background:#3ebc00"></i>Bosque<br>'+
    '<i style="background:#2380d1"></i>Plantación<br>'+
-   '<i style="background:#f4d000"></i>Matral<br>'+
+   '<i style="background:#f4d000"></i>Matrral<br>'+
    '<i style="background:#ff6500"></i>Agrofirestal<br>'+
    '<i style="background:#ba70cc"></i>Agricultura<br>'+
    '<i style="background:#aee173"></i>Pasto<br>'+
