@@ -659,8 +659,6 @@ if(map.hasLayer(degradationLayer)){
 
 function loadSelectedFires(){
 
-  legend.addTo(map);
-
   if(!currentArea){
 
     alert("Select district first");
@@ -675,6 +673,13 @@ function loadSelectedFires(){
     document.querySelectorAll(
       '.year-list input:checked'
     );
+    // 年が1つ以上選ばれたら表示
+    
+  if(checkedYears.length>0){
+
+     legend.addTo(map);
+
+  }
 
   checkedYears.forEach(item => {
 
