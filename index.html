@@ -205,6 +205,12 @@ input[type=range] {
 
 }
 
+.leaflet-top.leaflet-right{
+
+   margin-top:60px;
+
+}
+
 </style>
 
 </head>
@@ -292,9 +298,17 @@ Clear Fires
 
 // ================= 地図 =================
 
-var map = L.map('map')
+var map = L.map('map',{
 
-.setView([-13.5, -72.5], 7);
+   zoomControl:false
+
+}).setView([-13.5, -72.5], 7);
+
+L.control.zoom({
+
+   position:'topright'
+
+}).addTo(map);
 
 // ================= ベースマップ =================
 
@@ -803,6 +817,36 @@ function clearFires(){
   map.removeControl(legend);
 
 }
+// ================= Land Use Legend =================
+
+var landuseLegend=L.control({
+
+   position:'bottomright'
+
+});
+
+landuseLegend.onAdd=function(map){
+
+   var div=L.DomUtil.create(
+      'div',
+      'legend'
+   );
+
+   div.innerHTML=
+   "<b>Land Use</b><br>"+
+
+   '<i style="background:#3ebc00"></i>Bosque<br>'+
+   '<i style="background:#2380d1"></i>Plantación<br>'+
+   '<i style="background:#f4d000"></i>Matral<br>'+
+   '<i style="background:#ff6500"></i>Agrofirestal<br>'+
+   '<i style="background:#ba70cc"></i>Agricultura<br>'+
+   '<i style="background:#aee173"></i>Pasto<br>'+
+   '<i style="background:#513ece"></i>Rocas<br>'+
+   '<i style="background:#33dcba"></i>Acuática<br>';
+
+   return div;
+
+};
 
 // ================= 凡例 =================
 
