@@ -163,11 +163,11 @@ input[type=range] {
 
  .control-box{
 
-    width:220px;
+    width:160px;
 
     max-height:85vh;
 
-    left:-250px;
+    left:-180px;
 
     top:10px;
 
@@ -332,8 +332,12 @@ var esri = L.tileLayer(
 
 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 
-);
+{
+  attribution:
+    'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics'
 
+}
+);
 
 // ================= ラベル =================
 
