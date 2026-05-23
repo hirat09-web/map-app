@@ -942,49 +942,50 @@ function startGPS(){
 
   gpsWatchId = navigator.geolocation.watchPosition(
 
-    function(position){
+    function(position) {
 
-      var lat = position.coords.latitude;
-      var lon = position.coords.longitude;
-      var accuracy = position.coords.accuracy;
+        var lat = position.coords.latitude;
+        var lon = position.coords.longitude;
+        var accuracy = position.coords.accuracy;
 
-      var latlng = [lat, lon];
+        var latlng = [lat, lon];
 
-      // 古いGPS削除
-      if(gpsMarker){
+        // 古いGPS削除
+        if (gpsMarker) {
 
-        map.removeLayer(gpsMarker);
+            map.removeLayer(gpsMarker);
 
-      }
+        }
 
-      if(gpsCircle){
+        if (gpsCircle) {
 
-        map.removeLayer(gpsCircle);
+            map.removeLayer(gpsCircle);
 
-      }
+        }
 
-      // 現在地マーカー
-      gpsMarker = L.marker(latlng)
-        .addTo(map);
+        // 現在地マーカー
+        gpsMarker = L.marker(latlng)
+            .addTo(map);
 
-      // 精度円
-      gpsCircle = L.circle(latlng, {
+        // 精度円
+        gpsCircle = L.circle(latlng, {
 
-        radius: accuracy,
-        color:'#136aec',
-        fillColor:'#136aec',
-        fillOpacity:0.15
+            radius: accuracy,
+            color: '#136aec',
+            fillColor: '#136aec',
+            fillOpacity: 0.15
 
-      }).addTo(map);
+        }).addTo(map);
 
-      // 初回だけ現在地へ移動
-      if(firstGPSFix){
+        // 初回だけ現在地へ移動
+        if (firstGPSFix) {
 
-        map.setView(latlng, 15);
+            map.setView(latlng, 15);
 
-        firstGPSFix = false;
+            firstGPSFix = false;
 
-      }
+        }
+    },
 
     function(error){
 
