@@ -363,6 +363,7 @@ var degradationLayer = null;
 var landuseLayer = null;
 var fireLayers = [];
 var overlayControl = null;
+var activeOverlayLayer = null;
 var gpsMarker = null;
 var gpsCircle = null;
 var gpsWatchId = null;
@@ -475,40 +476,29 @@ document.getElementById("opacitySlider")
   var opacity =
     parseFloat(e.target.value);
 
-  if(fireRiskLayer){
+  // 現在選択中のOverlayだけ透明化
+  if(activeOverlayLayer){
 
-    fireRiskLayer.setOpacity(opacity);
+    // PNG Overlay
+    if(activeOverlayLayer.setOpacity){
+
+      activeOverlayLayer.setOpacity(opacity);
+
+    }
+
+    // GeoJSON Fire Layer
+    if(activeOverlayLayer.setStyle){
+
+      activeOverlayLayer.setStyle({
+
+        fillOpacity:opacity,
+        opacity:opacity
+
+      });
+
+    }
 
   }
-
-  if(waterLayer){
-
-    waterLayer.setOpacity(opacity);
-
-  }
-
-  if(degradationLayer){
-
-    degradationLayer.setOpacity(opacity);
-
-  }
-
-  if(landuseLayer){
-
-    landuseLayer.setOpacity(opacity);
-
-  }
-
-  fireLayers.forEach(layer => {
-
-    layer.setStyle({
-
-      fillOpacity:opacity,
-      opacity:opacity
-
-    });
-
-  });
 
 });
 
@@ -632,6 +622,24 @@ if(map.hasLayer(degradationLayer)){
      }
 
     ).addTo(map);
+
+  // Overlay ON時
+map.on('overlayadd', function(e){
+
+   activeOverlayLayer = e.layer;
+
+});
+
+// Overlay OFF時
+map.on('overlayremove', function(e){
+
+   if(activeOverlayLayer === e.layer){
+
+      activeOverlayLayer = null;
+
+   }
+
+});
 
   // ===== Land Use Legend ON/OFF =====
 
