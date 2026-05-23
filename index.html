@@ -239,6 +239,12 @@ San Juan del Oro
 
 <hr>
 
+<button id="gpsButton" onclick="toggleGPS()">
+📍 GPS ON
+</button>
+
+<hr>
+
 <b>Opacity</b>
 
 <input
@@ -357,6 +363,11 @@ var degradationLayer = null;
 var landuseLayer = null;
 var fireLayers = [];
 var overlayControl = null;
+var gpsMarker = null;
+var gpsCircle = null;
+var gpsWatchId = null;
+var gpsEnabled = false;
+var firstGPSFix = true;
 
 // ================= 年別色 =================
 
@@ -560,7 +571,7 @@ fireRiskLayer.on('load', function(){
 fireRiskLayer.on('error', function(){
    console.log("FireRisk ERROR");
 });
-    
+
 waterLayer = L.imageOverlay(
   data.water,
   data.bounds,
@@ -703,7 +714,7 @@ function loadSelectedFires(){
       '.year-list input:checked'
     );
     // 年が1つ以上選ばれたら表示
-    
+
   if(checkedYears.length>0){
 
      legend.addTo(map);
@@ -897,6 +908,131 @@ legend.onAdd = function(map){
 
   return div;
 };
+
+// ================= GPS =================
+
+function toggleGPS(){
+
+  if(!gpsEnabled){
+
+    startGPS();
+
+  }else{
+
+    stopGPS();
+
+  }
+
+}
+
+function startGPS(){
+
+  if(!navigator.geolocation){
+
+    alert("Geolocation is not supported");
+
+    return;
+
+  }
+
+  gpsEnabled = true;
+
+  document.getElementById("gpsButton")
+    .innerHTML = "❌ GPS OFF";
+
+  gpsWatchId = navigator.geolocation.watchPosition(
+
+    function(position){
+
+      var lat = position.coords.latitude;
+      var lon = position.coords.longitude;
+      var accuracy = position.coords.accuracy;
+
+      var latlng = [lat, lon];
+
+      // 古いGPS削除
+      if(gpsMarker){
+
+        map.removeLayer(gpsMarker);
+
+      }
+
+      if(gpsCircle){
+
+        map.removeLayer(gpsCircle);
+
+      }
+
+      // 現在地マーカー
+      gpsMarker = L.marker(latlng)
+        .addTo(map);
+
+      // 精度円
+      gpsCircle = L.circle(latlng, {
+
+        radius: accuracy,
+        color:'#136aec',
+        fillColor:'#136aec',
+        fillOpacity:0.15
+
+      }).addTo(map);
+
+      // 初回だけ現在地へ移動
+      if(firstGPSFix){
+
+        map.setView(latlng, 15);
+
+        firstGPSFix = false;
+
+      }
+
+    function(error){
+
+      console.log(error);
+
+      alert("Cannot get GPS");
+
+    },
+
+    {
+
+      enableHighAccuracy:true,
+      maximumAge:0,
+      timeout:10000
+
+    }
+
+  );
+
+}
+
+function stopGPS(){
+
+  gpsEnabled = false;
+
+  document.getElementById("gpsButton")
+    .innerHTML = "📍 GPS ON";
+
+  if(gpsWatchId !== null){
+
+    navigator.geolocation.clearWatch(gpsWatchId);
+
+  }
+
+  if(gpsMarker){
+
+    map.removeLayer(gpsMarker);
+
+  }
+
+  if(gpsCircle){
+
+    map.removeLayer(gpsCircle);
+
+  }
+  // 次回ON時に再び中央移動するため
+  firstGPSFix = true;
+}
 
 // ================= Menu Open / Close =================
 
