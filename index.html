@@ -552,30 +552,48 @@ document.getElementById("opacitySlider")
 
 .addEventListener("input", function(e){
 
-  var opacity =
-    parseFloat(e.target.value);
+   var opacity =
+      parseFloat(e.target.value);
 
-  // 現在選択中のOverlayだけ透明化
-  if(activeOverlayLayer){
+   // Fire Risk
+   if(fireRiskLayer && map.hasLayer(fireRiskLayer)){
 
-   if(typeof activeOverlayLayer.setOpacity === "function"){
-
-      activeOverlayLayer.setOpacity(opacity);
+      fireRiskLayer.setOpacity(opacity);
 
    }
 
-   if(typeof activeOverlayLayer.setStyle === "function"){
+   // Water
+   if(waterLayer && map.hasLayer(waterLayer)){
 
-      activeOverlayLayer.setStyle({
+      waterLayer.setOpacity(opacity);
+
+   }
+
+   // Degradation
+   if(degradationLayer && map.hasLayer(degradationLayer)){
+
+      degradationLayer.setOpacity(opacity);
+
+   }
+
+   // Land Use
+   if(landuseLayer && map.hasLayer(landuseLayer)){
+
+      landuseLayer.setOpacity(opacity);
+
+   }
+
+   // Fire GeoJSON
+   fireLayers.forEach(function(layer){
+
+      layer.setStyle({
 
          fillOpacity:opacity,
          opacity:opacity
 
       });
 
-   }
-
-  }
+   });
 
 });
 
