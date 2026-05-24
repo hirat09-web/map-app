@@ -431,6 +431,24 @@ var gpsWatchId = null;
 var gpsEnabled = false;
 var firstGPSFix = true;
 
+// Overlay ON時
+map.on('overlayadd', function(e){
+
+   activeOverlayLayer = e.layer;
+
+});
+
+// Overlay OFF時
+map.on('overlayremove', function(e){
+
+   if(activeOverlayLayer === e.layer){
+
+      activeOverlayLayer = null;
+
+   }
+
+});
+
 // ================= 年別色 =================
 
 var fireColors = {
@@ -540,24 +558,22 @@ document.getElementById("opacitySlider")
   // 現在選択中のOverlayだけ透明化
   if(activeOverlayLayer){
 
-    // PNG Overlay
-    if(activeOverlayLayer.setOpacity){
+   if(typeof activeOverlayLayer.setOpacity === "function"){
 
       activeOverlayLayer.setOpacity(opacity);
 
-    }
+   }
 
-    // GeoJSON Fire Layer
-    if(activeOverlayLayer.setStyle){
+   if(typeof activeOverlayLayer.setStyle === "function"){
 
       activeOverlayLayer.setStyle({
 
-        fillOpacity:opacity,
-        opacity:opacity
+         fillOpacity:opacity,
+         opacity:opacity
 
       });
 
-    }
+   }
 
   }
 
@@ -613,7 +629,9 @@ fireRiskLayer = L.imageOverlay(
   data.firerisk,
   data.bounds,
   {opacity:0.6}
-);
+).addTo(map);
+
+activeOverlayLayer = fireRiskLayer;
 
 fireRiskLayer.on('load', function(){
    console.log("FireRisk loaded");
