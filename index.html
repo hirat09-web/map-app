@@ -288,6 +288,15 @@ Forest Monitoring
 
 <hr>
 
+<b>Top Layers</b>
+
+<button onclick="showFireRisk()">Fire Risk</button>
+<button onclick="showWater()">Water</button>
+<button onclick="showDegradation()">Degradation</button>
+
+<hr>
+
+
 <button id="gpsButton" onclick="toggleGPS()">
 📍 GPS ON
 </button>
@@ -424,19 +433,30 @@ var gpsEnabled = false;
 var firstGPSFix = true;
 var topLayer = null;
 
-// Overlay ON時
+// Overlay追加時
 map.on('overlayadd', function(e){
 
-   activeOverlayLayer = e.layer;
+   // LandUse以外が追加されたら上レイヤ扱い
+   if(e.layer !== landuseLayer){
+
+      topLayer = e.layer;
+
+      topLayer.bringToFront();
+
+      if(boundaryLayer){
+         boundaryLayer.bringToFront();
+      }
+
+   }
 
 });
 
-// Overlay OFF時
+// Overlay削除時
 map.on('overlayremove', function(e){
 
-   if(activeOverlayLayer === e.layer){
+   if(topLayer===e.layer){
 
-      activeOverlayLayer = null;
+      topLayer=null;
 
    }
 
@@ -596,38 +616,6 @@ function showArea(area){
    map.removeLayer(landuseLayer);
 
   }
-
-// ================= 上レイヤ切替（③ここ） =================
-
-function showFireRisk(){
-
-   if(topLayer){
-      map.removeLayer(topLayer);
-   }
-
-   fireRiskLayer.addTo(map);
-   topLayer = fireRiskLayer;
-}
-
-function showWater(){
-
-   if(topLayer){
-      map.removeLayer(topLayer);
-   }
-
-   waterLayer.addTo(map);
-   topLayer = waterLayer;
-}
-
-function showDegradation(){
-
-   if(topLayer){
-      map.removeLayer(topLayer);
-   }
-
-   degradationLayer.addTo(map);
-   topLayer = degradationLayer;
-}
 
 // ===== PNG Overlay =====
 
