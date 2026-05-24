@@ -8,8 +8,7 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0">
 
-<title>Forest Monitoring Map</title>
-
+    
 <link
 rel="stylesheet"
 href="leaflet.css"
@@ -388,7 +387,7 @@ var osm = L.tileLayer(
 
 var esri = L.tileLayer(
 
-'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
 
 {
   attribution:
@@ -685,23 +684,6 @@ if(map.hasLayer(degradationLayer)){
 
     ).addTo(map);
 
-  // Overlay ON時
-map.on('overlayadd', function(e){
-
-   activeOverlayLayer = e.layer;
-
-});
-
-// Overlay OFF時
-map.on('overlayremove', function(e){
-
-   if(activeOverlayLayer === e.layer){
-
-      activeOverlayLayer = null;
-
-   }
-
-});
 
   // ===== Land Use Legend ON/OFF =====
 
