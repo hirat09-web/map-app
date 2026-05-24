@@ -282,17 +282,9 @@ Forest Monitoring
 
 <b>District</b>
 
-<button onclick="showArea('Huanipaca')">
-Huanipaca
-</button>
-
-<button onclick="showArea('Yanatile')">
-Yanatile
-</button>
-
-<button onclick="showArea('SJO')">
-San Juan del Oro
-</button>
+<button onclick="showArea('Huanipaca')">Huanipaca</button>
+<button onclick="showArea('Yanatile')">Yanatile</button>
+<button onclick="showArea('SJO')">San Juan del Oro</button>
 
 <hr>
 
@@ -430,6 +422,7 @@ var gpsCircle = null;
 var gpsWatchId = null;
 var gpsEnabled = false;
 var firstGPSFix = true;
+var topLayer = null;
 
 // Overlay ON時
 map.on('overlayadd', function(e){
@@ -547,53 +540,16 @@ document.getElementById("labelToggle")
 });
 
 // ================= 透明度 =================
-
 document.getElementById("opacitySlider")
-
 .addEventListener("input", function(e){
 
-   var opacity =
-      parseFloat(e.target.value);
+   var opacity = parseFloat(e.target.value);
 
-   // Fire Risk
-   if(fireRiskLayer && map.hasLayer(fireRiskLayer)){
+   if(topLayer){
 
-      fireRiskLayer.setOpacity(opacity);
+      topLayer.setOpacity(opacity);
 
    }
-
-   // Water
-   if(waterLayer && map.hasLayer(waterLayer)){
-
-      waterLayer.setOpacity(opacity);
-
-   }
-
-   // Degradation
-   if(degradationLayer && map.hasLayer(degradationLayer)){
-
-      degradationLayer.setOpacity(opacity);
-
-   }
-
-   // Land Use
-   if(landuseLayer && map.hasLayer(landuseLayer)){
-
-      landuseLayer.setOpacity(opacity);
-
-   }
-
-   // Fire GeoJSON
-   fireLayers.forEach(function(layer){
-
-      layer.setStyle({
-
-         fillOpacity:opacity,
-         opacity:opacity
-
-      });
-
-   });
 
 });
 
@@ -641,23 +597,45 @@ function showArea(area){
 
   }
 
+// ================= 上レイヤ切替（③ここ） =================
+
+function showFireRisk(){
+
+   if(topLayer){
+      map.removeLayer(topLayer);
+   }
+
+   fireRiskLayer.addTo(map);
+   topLayer = fireRiskLayer;
+}
+
+function showWater(){
+
+   if(topLayer){
+      map.removeLayer(topLayer);
+   }
+
+   waterLayer.addTo(map);
+   topLayer = waterLayer;
+}
+
+function showDegradation(){
+
+   if(topLayer){
+      map.removeLayer(topLayer);
+   }
+
+   degradationLayer.addTo(map);
+   topLayer = degradationLayer;
+}
+
 // ===== PNG Overlay =====
 
 fireRiskLayer = L.imageOverlay(
   data.firerisk,
   data.bounds,
   {opacity:0.6}
-).addTo(map);
-
-activeOverlayLayer = fireRiskLayer;
-
-fireRiskLayer.on('load', function(){
-   console.log("FireRisk loaded");
-});
-
-fireRiskLayer.on('error', function(){
-   console.log("FireRisk ERROR");
-});
+);
 
 waterLayer = L.imageOverlay(
   data.water,
