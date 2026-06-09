@@ -19,18 +19,13 @@ href="leaflet.css"
 <style>
 
 html,
-body {@media (max-width:768px){
+body {
 
-  .legend{
+  margin:0;
+  padding:0;
+  height:100%;
 
-    font-size:9px;
-    line-height:12px;
-    padding:4px;
-
-    max-height:120px;
-    overflow-y:auto;
-
-  }
+}
 
   .legend i{
 
@@ -223,9 +218,11 @@ input[type=range] {
     font-size:10px;
 
     padding:5px;
-  }
 
-  /* スマホ用ロゴ */
+    max-height:120px;
+    overflow-y:auto;
+
+  }
 
   .project-logo{
 
@@ -233,19 +230,19 @@ input[type=range] {
 
     height:55px;
 
-}
+  }
 
-.logo-title{
+  .logo-title{
 
-   font-size:11px;
+     font-size:11px;
 
-}
+  }
 
-}
+  .leaflet-bottom.leaflet-left{
 
-.leaflet-top.leaflet-right{
+     margin-bottom:20px;
 
-   margin-top:60px;
+  }
 
 }
 
@@ -715,6 +712,34 @@ if(map.hasLayer(degradationLayer)){
 
     });
 
+  // ===== Forest Degradation Legend =====
+
+  degradationLayer.on("add",function(){
+
+     degradationLegend.addTo(map);
+
+  });
+
+  degradationLayer.on("remove",function(){
+
+     map.removeControl(degradationLegend);
+
+  });
+
+
+  // ===== Fire Risk Legend =====
+
+  fireRiskLayer.on("add",function(){
+
+     fireRiskLegend.addTo(map);
+
+  });
+
+  fireRiskLayer.on("remove",function(){
+
+     map.removeControl(fireRiskLegend);
+
+  });
 
   // ===== Boundary =====
 
@@ -762,6 +787,96 @@ if(map.hasLayer(degradationLayer)){
   });
 
 }
+
+// ================= Forest Degradation Legend =================
+
+var degradationLegend = L.control({
+
+   position:'bottomleft'
+
+});
+
+degradationLegend.onAdd = function(map){
+
+   var div = L.DomUtil.create(
+      'div',
+      'legend'
+   );
+
+   div.innerHTML =
+
+      "<b>Forest Degradation</b><br>" +
+
+      '<i style="background:#00b859"></i>Low<br>' +
+
+      '<i style="background:#ffee1a"></i>Moderate<br>' +
+
+      '<i style="background:#ff7271"></i>High<br>';
+
+   return div;
+
+};
+
+// ================= Fire Risk Legend =================
+
+var fireRiskLegend = L.control({
+
+   position:'bottomleft'
+
+});
+
+fireRiskLegend.onAdd = function(map){
+
+   var div = L.DomUtil.create(
+      'div',
+      'legend'
+   );
+
+   div.innerHTML =
+
+   '<b>Fire Risk</b><br>' +
+
+   '<div style="' +
+
+   'display:flex;' +
+   'align-items:center;' +
+
+   '">' +
+
+   '<div style="' +
+
+   'width:18px;' +
+   'height:100px;' +
+
+   'background:linear-gradient(' +
+   'to top,' +
+   '#1f0066 0%,' +
+   '#004dff 25%,' +
+   '#00ffff 50%,' +
+   '#ffff00 75%,' +
+   '#ff0000 100%' +
+
+   ');' +
+
+   'margin-right:8px;' +
+
+   '"></div>' +
+
+   '<div style="font-size:11px;">' +
+
+   'High<br><br><br>' +
+
+   'Moderate<br><br><br>' +
+
+   'Low' +
+
+   '</div>' +
+
+   '</div>';
+
+   return div;
+
+};
 
 // ================= 火災表示 =================
 
