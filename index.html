@@ -19,11 +19,34 @@ href="leaflet.css"
 <style>
 
 html,
-body {
+body {@media (max-width:768px){
 
-  margin:0;
-  padding:0;
-  height:100%;
+  .legend{
+
+    font-size:9px;
+    line-height:12px;
+    padding:4px;
+
+    max-height:120px;
+    overflow-y:auto;
+
+  }
+
+  .legend i{
+
+    width:12px;
+    height:12px;
+    margin-right:4px;
+
+  }
+
+  .leaflet-bottom.leaflet-right{
+
+      margin-bottom:20px;
+
+  }
+
+}
 
 }
 
