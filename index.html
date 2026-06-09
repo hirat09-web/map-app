@@ -303,7 +303,7 @@ type="range"
 min="0"
 max="1"
 step="0.1"
-value="0.6"
+value="1"
 id="opacitySlider">
 
 <hr>
@@ -615,26 +615,26 @@ function showArea(area){
 fireRiskLayer = L.imageOverlay(
   data.firerisk,
   data.bounds,
-  {opacity:0.6}
+  {opacity:1.0}
 );
 
 waterLayer = L.imageOverlay(
   data.water,
   data.bounds,
-  {opacity:0.6}
+  {opacity:1.0}
 );
 
 degradationLayer = L.imageOverlay(
   data.degradation,
   data.bounds,
-  {opacity:0.6}
+  {opacity:1.0}
 );
 
 landuseLayer = L.imageOverlay(
   data.landuse,
   data.bounds,
   {
-    opacity:0.7
+    opacity:1.0
   }
 );
 
