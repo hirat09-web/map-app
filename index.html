@@ -258,6 +258,24 @@ input[type=range] {
 
 }
 
+/* ================= Place Labels ================= */
+
+.place-label{
+
+   background:transparent !important;
+
+   border:none !important;
+
+   box-shadow:none !important;
+
+   color:black;
+
+   font-size:12px;
+
+   font-weight:bold;
+
+}
+
 </style>
 
 </head>
@@ -390,29 +408,12 @@ var esri = L.tileLayer(
 }
 );
 
-// ================= ラベル =================
-
-map.createPane('labelsPane');
-
-map.getPane('labelsPane').style.zIndex = 650;
-
-map.getPane('labelsPane').style.pointerEvents = 'none';
-
-var labels = L.tileLayer(
-
-'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png',
-
-{
-  pane:'labelsPane'
-}
-
-).addTo(map);
 
 // ================= 状態 =================
 
 var currentArea = null;
 var boundaryLayer = null;
-var fireRiskLayer = null;
+var placeLabelsLayer = null;
 var waterLayer = null;
 var degradationLayer = null;
 var landuseLayer = null;
@@ -491,6 +492,7 @@ var areaData = {
     landuse:'Huanipaca_landuse.png',
 
     boundary:'Huanipaca.geojson'
+    labels:'Huanipaca_labels.geojson'
 
   },
 
@@ -510,6 +512,7 @@ var areaData = {
     landuse:'Yanatile_landuse.png',
 
     boundary:'Yanatile.geojson'
+    labels:'Yanatile_labels.geojson'
 
   },
 
@@ -529,6 +532,7 @@ var areaData = {
     landuse:'SJO_landuse.png',
 
     boundary:'SJO.geojson'
+    labels:'SJO_labels.geojson'
 
   }
 
@@ -537,18 +541,19 @@ var areaData = {
 // ================= ラベル ON/OFF =================
 
 document.getElementById("labelToggle")
-
 .addEventListener("change", function(e){
 
-  if(e.target.checked){
+   if(!placeLabelsLayer) return;
 
-    map.addLayer(labels);
+   if(e.target.checked){
 
-  } else {
+      map.addLayer(placeLabelsLayer);
 
-    map.removeLayer(labels);
+   }else{
 
-  }
+      map.removeLayer(placeLabelsLayer);
+
+   }
 
 });
 
@@ -583,6 +588,12 @@ function showArea(area){
   if(boundaryLayer){
 
     map.removeLayer(boundaryLayer);
+
+  }
+
+  if(placeLabelsLayer){
+
+    map.removeLayer(placeLabelsLayer);
 
   }
 
@@ -767,6 +778,73 @@ if(map.hasLayer(degradationLayer)){
 }
 
   });
+
+// ===== Place Labels =====
+
+fetch(data.labels)
+
+.then(function(response){
+
+   return response.json();
+
+})
+
+.then(function(geojson){
+
+   placeLabelsLayer = L.geoJSON(
+
+      geojson,
+
+      {
+
+         pointToLayer:function(feature,latlng){
+
+            return L.circleMarker(
+               latlng,
+               {
+                  radius:1,
+                  opacity:0,
+                  fillOpacity:0
+               }
+            );
+
+         },
+
+         onEachFeature:function(feature,layer){
+
+            layer.bindTooltip(
+
+               feature.properties.name,
+
+               {
+
+                  permanent:true,
+
+                  direction:'top',
+
+                  className:'place-label'
+
+               }
+
+            );
+
+         }
+
+      }
+
+   );
+
+   if(
+      document.getElementById(
+      "labelToggle"
+      ).checked
+   ){
+
+      placeLabelsLayer.addTo(map);
+
+   }
+
+});
 
 }
 
