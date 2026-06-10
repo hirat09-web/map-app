@@ -260,7 +260,7 @@ input[type=range] {
 
 }
 
-/* ================= Place Labels ================= */
+/* ================= Localidades ================= */
 
 .place-label{
 
@@ -298,13 +298,37 @@ input[type=range] {
 
 }
 
+.leaflet-control-layers-toggle{
+
+   background-image:none !important;
+
+   width:60px !important;
+
+   height:30px !important;
+
+   line-height:30px !important;
+
+   text-align:center;
+
+   font-weight:bold;
+
+   font-size:13px;
+
+}
+
+.leaflet-control-layers-toggle:after{
+
+   content:"Mapa";
+
+}
+
 </style>
 
 </head>
 
 <body>
 
-<button id="menuToggle">☰ Menu</button>
+<button id="menuToggle">☰ Menú</button>
 
 <!-- ================= UI ================= -->
 
@@ -315,14 +339,14 @@ input[type=range] {
 <img src="logo.png" class="project-logo">
 
 <div class="logo-title">
-Forest Monitoring
+Monitoreo Forestal
 </div>
 
 </div>
 
 <hr>
 
-<b>District</b>
+<b>Distrito</b>
 
 <button onclick="showArea('Huanipaca')">Huanipaca</button>
 <button onclick="showArea('Yanatile')">Yanatile</button>
@@ -336,7 +360,7 @@ Forest Monitoring
 
 <hr>
 
-<b>Opacity</b>
+<b>Transparencia</b>
 
 <input
 type="range"
@@ -351,13 +375,13 @@ id="opacitySlider">
 <label>
 
 <input type="checkbox" id="labelToggle">
-Place Labels
+Localidades
 
 </label>
 
 <hr>
 
-<b>Fire Years</b>
+<b>Años de Incendio</b>
 
 <div class="year-list">
 
@@ -374,11 +398,11 @@ Place Labels
 </div>
 
 <button onclick="loadSelectedFires()">
-Show Fires
+Mostrar Incendios
 </button>
 
 <button onclick="clearFires()">
-Clear Fires
+Borrar Incendios
 </button>
 
 </div>
@@ -745,8 +769,8 @@ if(map.hasLayer(degradationLayer)){
 
      {
 
-      "🗺 Background Map":osm,
-      "🛰 Satellite":esri
+      "🗺 Mapa Base":osm,
+      "🛰 Satélite":esri
 
      },
 
@@ -854,7 +878,7 @@ if(map.hasLayer(degradationLayer)){
 
   });
 
-// ===== Place Labels =====
+// ===== Localidades =====
 
 fetch(data.labels)
 
@@ -956,11 +980,11 @@ degradationLegend.onAdd = function(map){
 
       "<b>Forest Degradation</b><br>" +
 
-      '<i style="background:#00b859"></i>Low<br>' +
+      '<i style="background:#ff7271"></i>High<br>' +
 
       '<i style="background:#ffee1a"></i>Moderate<br>' +
 
-      '<i style="background:#ff7271"></i>High<br>';
+      '<i style="background:#00b859"></i>Low<br>';
 
    return div;
 
@@ -1013,11 +1037,11 @@ fireRiskLegend.onAdd = function(map){
 
    '<div style="font-size:11px;">' +
 
-   'Low<br><br><br>' +
+   'High<br><br><br>' +
 
    'Moderate<br><br><br>' +
 
-   'High' +
+   'Low' +
 
    '</div>' +
 
@@ -1222,7 +1246,7 @@ legend.onAdd = function(map){
   );
 
   div.innerHTML +=
-    "<b>Fire Years</b><br>";
+    "<b>Años de Incendio</b><br>";
 
   for(var year in fireColors){
 
