@@ -276,6 +276,28 @@ input[type=range] {
 
 }
 
+.place-label-dark{
+
+   color:black;
+
+}
+
+.place-label-light{
+
+   color:white;
+
+   font-size:13px;
+
+   font-weight:bold;
+
+   text-shadow:
+      0 0 3px #000,
+      0 0 3px #000,
+      0 0 3px #000,
+      0 0 5px #000;
+
+}
+
 </style>
 
 </head>
@@ -328,12 +350,8 @@ id="opacitySlider">
 
 <label>
 
-<input
-type="checkbox"
-id="labelToggle"
-checked>
-
-Place labels
+<input type="checkbox" id="labelToggle">
+Place Labels
 
 </label>
 
@@ -389,10 +407,10 @@ L.control.zoom({
 
 var osm = L.tileLayer(
 
-'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 
 {
-  attribution:'© OpenStreetMap © CARTO'
+  attribution:'© OpenStreetMap'
 }
 
 ).addTo(map);
@@ -408,6 +426,21 @@ var esri = L.tileLayer(
 }
 );
 
+map.on('baselayerchange', function(e){
+
+   if(
+      e.name === "🛰 Satellite"
+   ){
+
+      updateLabelColor(true);
+
+   }else{
+
+      updateLabelColor(false);
+
+   }
+
+});
 
 // ================= 状態 =================
 
@@ -571,6 +604,38 @@ document.getElementById("opacitySlider")
    }
 
 });
+
+// ================= ラベル色変更 =================
+
+function updateLabelColor(isSatellite){
+
+   if(!placeLabelsLayer) return;
+
+   placeLabelsLayer.eachLayer(function(layer){
+
+      if(layer.getTooltip()){
+
+         var el = layer.getTooltip().getElement();
+
+         if(!el) return;
+
+         if(isSatellite){
+
+            el.classList.remove("place-label-dark");
+            el.classList.add("place-label-light");
+
+         }else{
+
+            el.classList.remove("place-label-light");
+            el.classList.add("place-label-dark");
+
+         }
+
+      }
+
+   });
+
+}
 
 // ================= エリア表示 =================
 
@@ -823,7 +888,7 @@ fetch(data.labels)
 
                   direction:'top',
 
-                  className:'place-label'
+                  className:'place-label place-label-dark'
 
                }
 
