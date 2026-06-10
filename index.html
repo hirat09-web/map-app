@@ -581,6 +581,15 @@ document.getElementById("labelToggle")
 
       map.addLayer(placeLabelsLayer);
 
+      // 背景に応じて色変更
+      setTimeout(function(){
+
+         updateLabelColor(
+            map.hasLayer(esri)
+         );
+
+      },100);
+
    }else{
 
       map.removeLayer(placeLabelsLayer);
@@ -619,15 +628,15 @@ function updateLabelColor(isSatellite){
 
          if(isSatellite){
 
-            el.classList.remove("place-label-dark");
-            el.classList.add("place-label-light");
+   　　　　　　el.className =
+　　　　      "leaflet-tooltip place-label place-label-light";
 
-         }else{
+　　　　　　}else{
 
-            el.classList.remove("place-label-light");
-            el.classList.add("place-label-dark");
+　　　　　　   el.className =
+      　　　　"leaflet-tooltip place-label place-label-dark";
 
-         }
+　　　　　　}
 
       }
 
