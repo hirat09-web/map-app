@@ -885,25 +885,26 @@ fetch(data.labels)
 
          onEachFeature:function(feature,layer){
 
-            layer.bindTooltip(
+  　　　　　　 var labelClass =
+     　　　　　　 map.hasLayer(esri)
+    　　　　　　  ? 'place-label place-label-light'
+   　　　　　　   : 'place-label place-label-dark';
 
-               feature.properties.name,
+　　　　　　   layer.bindTooltip(
 
-               {
+      　　　　　　feature.properties.name,
 
-                  permanent:true,
+     　　　　　　 {
+　　　
+         　　　　　　permanent:true,
+         　　　　　　direction:'top',
+         　　　　　　className: labelClass
 
-                  direction:'top',
+   　　　　　　   }
 
-                  className:
-                       map.hasLayer(esri)
-                       ? 'place-label place-label-light'
-                       : 'place-label place-label-dark'
-               }
+   　　　　　);
 
-            );
-
-         }
+　　　　　}
 
       }
 
