@@ -1273,16 +1273,24 @@ function startGPS(){
         }
 
         // 現在地マーカー
-        gpsMarker = L.marker(latlng)
-            .addTo(map);
+        gpsMarker = L.circleMarker(latlng,{
+
+           radius:10,
+           color:'#ffffff',
+           weight:3,
+           fillColor:'#ff0000',
+           fillOpacity:1
+
+        }).addTo(map);
 
         // 精度円
         gpsCircle = L.circle(latlng, {
 
             radius: accuracy,
-            color: '#136aec',
-            fillColor: '#136aec',
-            fillOpacity: 0.15
+            color:'#ff0000',
+            weight:1,
+            fillColor: '#ff0000',
+            fillOpacity: 0.08
 
         }).addTo(map);
 
