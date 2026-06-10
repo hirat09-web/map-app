@@ -902,13 +902,24 @@ fetch(data.labels)
 
    if(
       document.getElementById(
-      "labelToggle"
-      ).checked
-   ){
+   　  "labelToggle"
+ 　　　).checked
+　　){
 
-      placeLabelsLayer.addTo(map);
+   　　placeLabelsLayer.addTo(map);
+
+   // 現在の背景に応じて文字色変更
+   if(map.hasLayer(esri)){
+
+      updateLabelColor(true);
+
+   }else{
+
+      updateLabelColor(false);
 
    }
+
+}
 
 });
 
