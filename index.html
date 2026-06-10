@@ -268,8 +268,6 @@ input[type=range] {
 
    box-shadow:none !important;
 
-   color:black;
-
    font-size:12px;
 
    font-weight:bold;
@@ -888,8 +886,10 @@ fetch(data.labels)
 
                   direction:'top',
 
-                  className:'place-label place-label-dark'
-
+                  className:
+                       map.hasLayer(esri)
+                       ? 'place-label place-label-light'
+                       : 'place-label place-label-dark'
                }
 
             );
