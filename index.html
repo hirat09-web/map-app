@@ -1432,8 +1432,13 @@ function stopGPS(){
 
 function showProjectInfo(){
 
+   var popupWidth =
+      window.innerWidth < 768
+      ? 250
+      : 500;
+
    L.popup({
-      maxWidth:500
+      maxWidth: popupWidth
    })
 
    .setLatLng(map.getCenter())
