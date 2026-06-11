@@ -260,6 +260,24 @@ input[type=range] {
 
 }
 
+.info-icon{
+
+   cursor:pointer;
+
+   font-size:18px;
+
+   margin-left:5px;
+
+   vertical-align:top;
+
+}
+
+.logo-container{
+
+   cursor:pointer;
+
+}
+
 /* ================= Localidades ================= */
 
 .place-label{
@@ -340,13 +358,20 @@ input[type=range] {
 
 <div class="control-box" id="menuBox">
 
-<div class="logo-container">
+<div
+   class="logo-container"
+   onclick="showProjectInfo()"
+>
 
-<img src="logo.png" class="project-logo">
+   <img src="logo.png" class="project-logo">
 
-<div class="logo-title">
-Monitoreo Forestal
-</div>
+   <span class="info-icon">
+      ℹ️
+   </span>
+
+   <div class="logo-title">
+      Monitoeo Forestal
+   </div>
 
 </div>
 
@@ -1403,6 +1428,39 @@ function stopGPS(){
   }
   // 次回ON時に再び中央移動するため
   firstGPSFix = true;
+}
+
+function showProjectInfo(){
+
+   L.popup({
+      maxWidth:500
+   })
+
+   .setLatLng(map.getCenter())
+
+   .setContent(
+
+      "<b>Proyecto CEFORAA</b><br><br>" +
+
+      "Este sistema fue desarrollado en el marco del Programa SATREPS financiado por JST y JICA.<br><br>" +
+
+      "Es un resultado del proyecto:<br><br>" +
+
+      "<i>Proyecto de Establecimiento de Modelo de Sistema Integrado de Manejo Forestal para la Conservación de Ecosistemas Forestales de Montaña en la Región Andina-Amazónica (CEFORAA)</i><br><br>" +
+
+      "Implementado por:<br>" +
+
+      "• Universidad Nacional Agraria La Molina (UNALM)<br>" +
+      "• SERFOR<br>" +
+      "• FFPRI<br>" +
+      "• Universidad de Chiba<br>" +
+      "• Universidad de Kyushu<br>" +
+      "• JAFTA"
+
+   )
+
+   .openOn(map);
+
 }
 
 // ================= Menu Open / Close =================
