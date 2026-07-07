@@ -119,7 +119,7 @@ input[type=range] {
   opacity:0.8;
 }
 
-/* ================= Menu Button ================= */
+/* ================= Botón de menú ================= */
 
 #menuToggle{
 
@@ -146,11 +146,11 @@ input[type=range] {
 
   display:none;
 
-  width:auto;   /* ←追加 */
+  width:auto;
 }
 
 
-/* ================= Smartphone ================= */
+/* ================= Teléfono inteligente ================= */
 
 @media (max-width:768px){
 
@@ -340,7 +340,7 @@ input[type=range] {
 
 }
 
-/* PNGをぼかさず表示 */
+/* Mostrar PNG sin desenfoque */
 .leaflet-image-layer{
    image-rendering: pixelated;
    image-rendering: crisp-edges;
@@ -438,13 +438,13 @@ Borrar Incendios
 
 </div>
 
-<!-- ================= 地図 ================= -->
+<!-- ================= Mapa ================= -->
 
 <div id="map"></div>
 
 <script>
 
-// ================= 地図 =================
+// ================= Mapa =================
 
 var map = L.map('map',{
 
@@ -458,7 +458,7 @@ L.control.zoom({
 
 }).addTo(map);
 
-// ================= ベースマップ =================
+// ================= Mapa base =================
 
 var osm = L.tileLayer(
 
@@ -497,7 +497,7 @@ map.on('baselayerchange', function(e){
 
 });
 
-// ================= 状態 =================
+// ================= estado =================
 
 var currentArea = null;
 var boundaryLayer = null;
@@ -516,10 +516,10 @@ var gpsEnabled = false;
 var firstGPSFix = true;
 var topLayer = null;
 
-// Overlay追加時
+// Al agregar una superposición
 map.on('overlayadd', function(e){
 
-   // LandUse以外が追加されたら上レイヤ扱い
+   // Si se añade algo que no sea uso del suelo, se considera una capa superior
    if(e.layer !== landuseLayer){
 
       topLayer = e.layer;
@@ -534,7 +534,7 @@ map.on('overlayadd', function(e){
 
 });
 
-// Overlay削除時
+// Al eliminar la superposición
 map.on('overlayremove', function(e){
 
    if(topLayer===e.layer){
@@ -545,23 +545,23 @@ map.on('overlayremove', function(e){
 
 });
 
-// ================= 年別色 =================
+// ================= Color por año =================
 
 var fireColors = {
 
-  2017:"#e41a1c", // 赤
-  2018:"#377eb8", // 青
-  2019:"#4daf4a", // 緑
-  2020:"#984ea3", // 紫
-  2021:"#ff7f00", // オレンジ
-  2022:"#ffff33", // 黄
-  2023:"#a65628", // 茶
-  2024:"#f781bf", // ピンク
-  2025:"#17becf"  // 水色
+  2017:"#e41a1c", // rojo
+  2018:"#377eb8", // azul
+  2019:"#4daf4a", // verde
+  2020:"#984ea3", // púrpura
+  2021:"#ff7f00", // naranja
+  2022:"#ffff33", // amarillo
+  2023:"#a65628", // marrón
+  2024:"#f781bf", // rosa
+  2025:"#17becf"  // celeste
 
 };
 
-// ================= データ =================
+// ================= Datos =================
 
 var areaData = {
 
@@ -627,7 +627,7 @@ var areaData = {
 
 };
 
-// ================= ラベル ON/OFF =================
+// ================= Etiqueta ON/OFF =================
 
 document.getElementById("labelToggle")
 .addEventListener("change", function(e){
@@ -638,7 +638,7 @@ document.getElementById("labelToggle")
 
       map.addLayer(placeLabelsLayer);
 
-      // 背景に応じて色変更
+      // Cambiar el color según el fondo
       setTimeout(function(){
 
          updateLabelColor(
@@ -655,7 +655,7 @@ document.getElementById("labelToggle")
 
 });
 
-// ================= 透明度 =================
+// =================transparencia =================
 document.getElementById("opacitySlider")
 .addEventListener("input", function(e){
 
@@ -669,7 +669,7 @@ document.getElementById("opacitySlider")
 
 });
 
-// ================= ラベル色変更 =================
+// ================= Cambiar color de etiqueta =================
 
 function updateLabelColor(isSatellite){
 
@@ -701,7 +701,7 @@ function updateLabelColor(isSatellite){
 
 }
 
-// ================= エリア表示 =================
+// ================= Mostrar área =================
 
 function showArea(area){
 
@@ -713,7 +713,7 @@ function showArea(area){
 
   map.fitBounds(data.bounds);
 
-  // ===== 古いレイヤ削除 =====
+  // ===== Eliminar capa antigua =====
 
   if(boundaryLayer){
 
@@ -751,7 +751,7 @@ function showArea(area){
 
   }
 
-// ===== PNG Overlay =====
+// ===== Superposición PNG =====
 
 fireRiskLayer = L.imageOverlay(
   data.firerisk,
@@ -779,7 +779,7 @@ landuseLayer = L.imageOverlay(
   }
 );
 
-// 念のため他は削除
+// Por si acaso, borré lo demás
 if(map.hasLayer(waterLayer)){
   map.removeLayer(waterLayer);
 }
@@ -788,7 +788,7 @@ if(map.hasLayer(degradationLayer)){
   map.removeLayer(degradationLayer);
 }
 
-  // ===== Overlay Control =====
+  // ===== Control de superposición =====
 
   if(overlayControl){
 
@@ -807,10 +807,10 @@ if(map.hasLayer(degradationLayer)){
 
      {
 
-       "🌾 Land Use":landuseLayer,
-       "🌲 Forest Degradation":degradationLayer,
-       "🔥 Fire Risk":fireRiskLayer,
-       "💧 Water Resources":waterLayer
+       "🌾 Uso de la tierra":landuseLayer,
+       "🌲 Degradación del bosque":degradationLayer,
+       "🔥 Riesgo de incendios":fireRiskLayer,
+       "💧 Recursos hídricos":waterLayer
 
      },
 
@@ -821,7 +821,7 @@ if(map.hasLayer(degradationLayer)){
     ).addTo(map);
 
 
-  // ===== Land Use Legend ON/OFF =====
+  // ===== Leyenda de Uso de Suelo ON/OFF =====
 
     landuseLayer.on("add",function(){
 
@@ -835,7 +835,7 @@ if(map.hasLayer(degradationLayer)){
 
     });
 
-  // ===== Forest Degradation Legend =====
+  // ===== Leyenda de la Degradación Forestal =====
 
   degradationLayer.on("add",function(){
 
@@ -850,7 +850,7 @@ if(map.hasLayer(degradationLayer)){
   });
 
 
-  // ===== Fire Risk Legend =====
+  // ===== Leyenda de Riesgo de Incendio =====
 
   fireRiskLayer.on("add",function(){
 
@@ -864,7 +864,7 @@ if(map.hasLayer(degradationLayer)){
 
   });
 
-  // ===== Boundary =====
+  // ===== Límite =====
 
   fetch(data.boundary)
 
@@ -975,7 +975,7 @@ fetch(data.labels)
 
    　　placeLabelsLayer.addTo(map);
 
-   // 現在の背景に応じて文字色変更
+   // Cambiar el color del texto según el fondo actual
    if(map.hasLayer(esri)){
 
       updateLabelColor(true);
@@ -992,7 +992,7 @@ fetch(data.labels)
 
 }
 
-// ================= Forest Degradation Legend =================
+// ================= Leyenda de la Degradación Forestal =================
 
 var degradationLegend = L.control({
 
@@ -1021,7 +1021,7 @@ degradationLegend.onAdd = function(map){
 
 };
 
-// ================= Fire Risk Legend =================
+// ================= Leyenda de Riesgo de Incendio =================
 
 var fireRiskLegend = L.control({
 
@@ -1082,7 +1082,7 @@ fireRiskLegend.onAdd = function(map){
 
 };
 
-// ================= 火災表示 =================
+// ================= Indicador de incendio =================
 
 function loadSelectedFires(){
 
@@ -1215,7 +1215,7 @@ function loadSelectedFires(){
 
 }
 
-// ================= 火災削除 =================
+// ================= Eliminación de incendios =================
 
 function clearFires(){
 
@@ -1230,7 +1230,7 @@ function clearFires(){
   map.removeControl(legend);
 
 }
-// ================= Land Use Legend =================
+// ================= Leyenda de Uso de Suelo =================
 
 var landuseLegend=L.control({
 
@@ -1250,8 +1250,8 @@ landuseLegend.onAdd=function(map){
 
    '<i style="background:#3ebc00"></i>Bosque<br>'+
    '<i style="background:#2380d1"></i>Plantación<br>'+
-   '<i style="background:#f4d000"></i>Matrral<br>'+
-   '<i style="background:#ff6500"></i>Agrofirestal<br>'+
+   '<i style="background:#f4d000"></i>Matorral<br>'+
+   '<i style="background:#ff6500"></i>Agroforestal<br>'+
    '<i style="background:#ba70cc"></i>Agricultura<br>'+
    '<i style="background:#aee173"></i>Pasto<br>'+
    '<i style="background:#513ece"></i>Rocas<br>'+
@@ -1261,7 +1261,7 @@ landuseLegend.onAdd=function(map){
 
 };
 
-// ================= 凡例 =================
+// ================= Leyenda =================
 
 var legend = L.control({
 
@@ -1337,7 +1337,7 @@ function startGPS(){
 
         var latlng = [lat, lon];
 
-        // 古いGPS削除
+        // Eliminar GPS antiguo
         if (gpsMarker) {
 
             map.removeLayer(gpsMarker);
@@ -1350,7 +1350,7 @@ function startGPS(){
 
         }
 
-        // 現在地マーカー
+        // Marcador de ubicación actual
         gpsMarker = L.circleMarker(latlng,{
 
            radius:10,
@@ -1361,7 +1361,7 @@ function startGPS(){
 
         }).addTo(map);
 
-        // 精度円
+        // círculo de precisión
         gpsCircle = L.circle(latlng, {
 
             radius: accuracy,
@@ -1372,7 +1372,7 @@ function startGPS(){
 
         }).addTo(map);
 
-        // 初回だけ現在地へ移動
+        // Moverse a la ubicación actual solo la primera vez
         if (firstGPSFix) {
 
             map.setView(latlng, 15);
@@ -1426,7 +1426,7 @@ function stopGPS(){
     map.removeLayer(gpsCircle);
 
   }
-  // 次回ON時に再び中央移動するため
+  // Para moverse de nuevo al centro la próxima vez que se encienda
   firstGPSFix = true;
 }
 
@@ -1471,7 +1471,7 @@ function showProjectInfo(){
 
 }
 
-// ================= Menu Open / Close =================
+// ================= Abrir / Cerrar menú =================
 
 document
 .getElementById("menuToggle")
