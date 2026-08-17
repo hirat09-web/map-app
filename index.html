@@ -1120,7 +1120,9 @@ function loadSelectedFires(){
       year +
       '.geojson';
 
-    fetch(path)
+    fetch(path + '?v=' + Date.now(), {
+      cache: 'no-store'
+    })
 
     .then(function(response){
 
