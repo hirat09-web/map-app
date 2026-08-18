@@ -1,3 +1,4 @@
+```
 <!DOCTYPE html>
 <html>
 
@@ -294,16 +295,6 @@ input[type=range] {
 
 }
 
-/* ================= Localidades ================= */
-
-.place-label{
-   background:transparent !important;
-   border:none !important;
-   box-shadow:none !important;
-   font-size:13px !important;
-   font-weight:bold !important;
-}
-
 .place-label-dark{
    color:black !important;
    text-shadow:
@@ -317,7 +308,6 @@ input[type=range] {
    color:white !important;
    font-size:13px !important;
    font-weight:bold !important;
-
    text-shadow:
       -1px -1px 2px black,
        1px -1px 2px black,
@@ -494,9 +484,7 @@ var esri = L.tileLayer(
 
 map.on('baselayerchange', function(e){
 
-   if(
-      e.name === "🛰 Satellite"
-   ){
+   if(e.layer === esri){
 
       updateLabelColor(true);
 
@@ -1019,14 +1007,10 @@ degradationLegend.onAdd = function(map){
    );
 
    div.innerHTML =
-
       "<b>Degradación del bosque</b><br>" +
-
-      '<i style="background:#ff7271"></i>Fuerte<br>' +
-
-      '<i style="background:#ffee1a"></i>Moderado<br>' +
-
-      '<i style="background:#00b859"></i>Débil<br>';
+      '<i style="background:#fd5857"></i>Fuerte<br>' +
+      '<i style="background:#f4fd5e"></i>Medio<br>' +
+      '<i style="background:#00ad22"></i>Débil<br>';
 
    return div;
 
@@ -1035,9 +1019,7 @@ degradationLegend.onAdd = function(map){
 // ================= Leyenda de Riesgo de Incendio =================
 
 var fireRiskLegend = L.control({
-
    position:'bottomleft'
-
 });
 
 fireRiskLegend.onAdd = function(map){
@@ -1048,46 +1030,12 @@ fireRiskLegend.onAdd = function(map){
    );
 
    div.innerHTML =
-
-   '<b>Riesgo de incendios</b><br>' +
-
-   '<div style="' +
-
-   'display:flex;' +
-   'align-items:center;' +
-
-   '">' +
-
-   '<div style="' +
-
-   'width:18px;' +
-   'height:100px;' +
-
-   'background:linear-gradient(' +
-   'to top,' +
-   '#1f0066 0%,' +
-   '#004dff 25%,' +
-   '#00ffff 50%,' +
-   '#ffff00 75%,' +
-   '#ff0000 100%' +
-
-   ');' +
-
-   'margin-right:8px;' +
-
-   '"></div>' +
-
-   '<div style="font-size:11px;">' +
-
-   'Alto<br><br><br>' +
-
-   'Moderado<br><br><br>' +
-
-   'Bajo' +
-
-   '</div>' +
-
-   '</div>';
+      '<b>Riesgo de incendios</b><br>' +
+      '<i style="background:#d62125"></i>Muy alto<br>' +
+      '<i style="background:#f5ad58"></i>Alto<br>' +
+      '<i style="background:#ffffbf"></i>Moderado<br>' +
+      '<i style="background:#aeee97"></i>Bajo<br>' +
+      '<i style="background:#3195e8"></i>Muy bajo<br>';
 
    return div;
 
@@ -1131,9 +1079,7 @@ function loadSelectedFires(){
       year +
       '.geojson';
 
-    fetch(path + '?v=' + Date.now(), {
-      cache: 'no-store'
-    })
+    fetch(path)
 
     .then(function(response){
 
@@ -1500,3 +1446,4 @@ document
 
 </body>
 </html>
+```
