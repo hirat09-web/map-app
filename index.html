@@ -849,6 +849,20 @@ if(map.hasLayer(degradationLayer)){
   });
 
 
+  // ===== Leyenda de Recursos Hídricos =====
+
+   waterLayer.on("add",function(){
+
+      waterLegend.addTo(map);
+
+   });
+
+   waterLayer.on("remove",function(){
+
+      map.removeControl(waterLegend);
+
+   });
+
   // ===== Leyenda de Riesgo de Incendio =====
 
   fireRiskLayer.on("add",function(){
@@ -1036,6 +1050,64 @@ fireRiskLegend.onAdd = function(map){
       '<i style="background:#ffffbf"></i>Moderado<br>' +
       '<i style="background:#aeee97"></i>Bajo<br>' +
       '<i style="background:#3195e8"></i>Muy bajo<br>';
+
+   return div;
+
+};
+
+// ================= Leyenda de Recursos Hídricos =================
+
+var waterLegend = L.control({
+
+   position:'bottomleft'
+
+});
+
+waterLegend.onAdd = function(map){
+
+   var div = L.DomUtil.create(
+      'div',
+      'legend'
+   );
+
+   div.innerHTML =
+
+   '<b>Recursos hídricos</b><br>' +
+
+   '<div style="' +
+   'display:flex;' +
+   'align-items:center;' +
+   '">' +
+
+   '<div style="' +
+   'width:18px;' +
+   'height:120px;' +
+   'background:linear-gradient(' +
+   'to top,' +
+   '#e65c5e 0%,' +
+   '#f5a66b 25%,' +
+   '#fff6b0 50%,' +
+   '#a8dca0 75%,' +
+   '#2379d0 100%' +
+   ');' +
+   'margin-right:8px;' +
+   '"></div>' +
+
+   '<div style="' +
+   'height:120px;' +
+   'display:flex;' +
+   'flex-direction:column;' +
+   'justify-content:space-between;' +
+   'font-size:11px;' +
+   '">' +
+
+   '<span>≥ 500 mm</span>' +
+   '<span>250 mm</span>' +
+   '<span>0 mm</span>' +
+
+   '</div>' +
+
+   '</div>';
 
    return div;
 
